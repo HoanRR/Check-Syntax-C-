@@ -1,0 +1,23 @@
+Program      := { Function | Decl } EOF
+Function     := Type Ident "(" [ParamList] ")" Block
+Decl         := Type Ident [ "=" Expr ] ";"
+ParamList    := (Type Ident) { "," Type Ident }
+Block        := "{" { Stmt } "}"
+Stmt         := Decl | ExprStmt | ReturnStmt | IfStmt | WhileStmt | Block
+ExprStmt     := [Expr] ";"
+ReturnStmt   := "return" [Expr] ";"
+IfStmt       := "if" "(" Expr ")" Stmt ["else" Stmt]
+WhileStmt    := "while" "(" Expr ")" Stmt
+
+Expr         := Assign
+Assign       := Logic ( "=" Assign )?
+Logic        := Rel (("&&"|"||") Rel)*
+Rel          := Add (("=="|"!="|"<"|">"|"<="|">=") Add)*
+Add          := Mul (("+"|"-") Mul)*
+Mul          := Unary (("*"|"/"|"%") Unary)*
+Unary        := ("+"|"-"|"!")? Primary
+Primary      := Ident | Number | "(" Expr ")"
+
+Type         := "int" | "float" | "double" | "void"   // MVP
+Ident        := letter { letter | digit | "_" }
+Number       := digit { digit }
