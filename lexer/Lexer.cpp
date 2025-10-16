@@ -8,15 +8,32 @@ char Lexer::peek(int k = 0)
 char Lexer::get()
 {
     char c = peek();
-    if (c == '\n')
+    if (c == '\0')
+        return '\0';
+    i++;
+
+    if (c == '\r')
+    {
+        // Nếu là CRLF, nuốt luôn '\n' và tính là 1 newline
+        if (peek() == '\n')
+        {
+            i++;
+        }
+        line++;
+        col = 1;
+        return '\n'; // (tùy, có thể trả '\n' để tiện debug)
+    }
+    else if (c == '\n')
     {
         line++;
         col = 1;
+        return c;
     }
     else
+    {
         col++;
-    i++;
-    return c;
+        return c;
+    }
 }
 
 static inline bool isSpace(char c)
@@ -114,7 +131,7 @@ Token Lexer::makeIdentifier()
         "else",
         "while",
         "for",
-    };
+        "const"};
     TokenType Type = keywords.find(ident) != keywords.end() ? Keyword : Identifier;
 
     int len = ident.length();
