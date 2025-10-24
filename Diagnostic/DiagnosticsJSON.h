@@ -18,6 +18,8 @@ string Diagnostic_to_JSON(const vector<DiagnosticItem> &items)
           << "\"column\":" << d.col << ","
           << "\"length\":" << d.length
           << "}";
+        if (&d != &items.back())
+            o << ", \n";
     }
     o << "\n  ]\n}";
     return o.str();
