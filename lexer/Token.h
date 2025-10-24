@@ -8,7 +8,7 @@ enum TokenType
     Identifier,
     Operator,
     Number,
-    String,   // NEW
+    String, 
     Char,
     Symbol,
     End,

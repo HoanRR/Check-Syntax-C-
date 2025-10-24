@@ -1,25 +1,33 @@
 #include "../lexer/Lexer.h"
-
+#include "../Diagnostic/DiagnosticReporter.h"
+#include "semantics.h"
 class Parser
 {
 public:
     void parseProgram();
     Parser(const vector<Token> &);
     static int ERROR;
+    DiagnosticReporter *diag = nullptr;
 
+    void setDiagnosticReporter(DiagnosticReporter *);
+    void setSemantics(semantics* );
 private:
     const vector<Token> &t;
+    TypeKind lastTypekind = TypeKind::Unknown;
     int p = 0;
-
+    semantics* sem = nullptr;
+    void reportSyntax(const string &, const Token &);
     void error(const string &);
     void upP();
 
-    const Token &LA(int);
+    const Token &LA(int = 0);
     bool isEnd();
 
     bool isOp(const string &);
     bool isSym(const string &);
+
     bool isKw(const string &);
+    bool isSyncSym(const Token &);
 
     bool acceptOp(const string &);
     bool acceptSym(const string &);
@@ -29,16 +37,17 @@ private:
     void expectSym(const string &);
     void expectKw(const string &);
 
-    string expectIdent();
+    Token expectIdent();
     string expectNumber();
 
     bool lookLikeType();
-    bool lookLikeFuction();
+    bool lookLikeFunction();
     // ===== Grammar (EBNF) =====
     void parseFunction();   // Function := Type Ident "(" [ParamList] ")" Block
-    void parseDecl();       // Decl     := Type Ident [ "=" Expr ] ";"
+    void parseDecl();       // Decl     := Type Declarator 
+    void parseDeclarator(); // Declarator := Ident { "," Ident } [ "=" Expr ] ";"
     void parseParamList();  // ParamList:= (Type Ident) { "," Type Ident }
-    void parseBlock();      // Block    := "{" { Stmt } "}"
+    void parseBlock(bool );      // Block    := "{" { Stmt } "}"
     void parseStmt();       // Stmt     := Decl | ExprStmt | ReturnStmt | IfStmt | WhileStmt | Block
     void parseExprStmt();   // ExprStmt := [Expr] ";"
     void parseReturnStmt(); // ReturnStmt:= "return" [Expr] ";"
@@ -46,15 +55,22 @@ private:
     void parseWhileStmt();  // WhileStmt:= "while" "(" Expr ")" Stmt
 
     // Expr
-    void parseExpr();    // Expr     := Assign
-    void parseAssign();  // Assign   := Logic ( "=" Assign )?
-    void parseLogic();   // Logic    := Rel (("&&"|"||") Rel)*
-    void parseRel();     // Rel      := Add (("=="|"!="|"<"|">"|"<="|">=") Add)*
-    void parseAdd();     // Add      := Mul (("+"|"-") Mul)*
-    void parseMul();     // Mul      := Unary (("*"|"/"|"%") Unary)*
-    void parseUnary();   // Unary    := ("+"|"-"|"!")? Primary
+    void parseExpr();   // Expr     := Assign
+    void parseAssign(); // Assign   := LogicalOr ( "=" Assign )?
+    void parseLogicalOr();  //   ||
+    void parseLogicalAnd(); //  &&
+    void parseEquality(); //  ==, !=
+    void parseRelational(); // <, >, <=, >=
+    void parseAdd();   // Add      := Mul (("+"|"-") Mul)*
+    void parseMul();   // Mul      := Unary (("*"|"/"|"%") Unary)*
+    void parseUnary(); // Unary    := ("+"|"-"|"!")? Primary
     void parseArgList(); // ArgList  := [Expr {"," Expr}]
     void parsePrimary(); // Primary  := Ident | Number | "(" Expr ")" | Call
+    void parseShift();    //   <<, >>
+    void parsePostfix();  //   hậu tố ++, --
+
 
     void parseType(); // Type     := "int" | "float" | "double" | "void"
+    void parseBinaryLeftAssoc(void (Parser::*)(), const vector<string> &); // helper for left-assoc binary ops
+
 };

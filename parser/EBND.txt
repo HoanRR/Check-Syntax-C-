@@ -2,6 +2,7 @@ Program      := { Function | Decl } EOF
 Function     := Type Ident "(" [ParamList] ")" Block
 Decl         := Type Ident [ "=" Expr ] ";"
 ParamList    := (Type Ident) { "," Type Ident }
+ArgList      := [Expr {"," Expr}]
 Block        := "{" { Stmt } "}"
 Stmt         := Decl | ExprStmt | ReturnStmt | IfStmt | WhileStmt | Block
 ExprStmt     := [Expr] ";"
@@ -16,6 +17,7 @@ Rel          := Add (("=="|"!="|"<"|">"|"<="|">=") Add)*
 Add          := Mul (("+"|"-") Mul)*
 Mul          := Unary (("*"|"/"|"%") Unary)*
 Unary        := ("+"|"-"|"!")? Primary
+ArgList      := [Expr {"," Expr}]
 Primary      := Ident | Number | "(" Expr ")"
 
 Type         := "int" | "float" | "double" | "void"   // MVP
