@@ -1,3 +1,0 @@
-C:\mingw64\bin\cmake.exe -E rm -f CMakeFiles\editor.dir/objects.a
-C:\mingw\mingw64\bin\ar.exe qc CMakeFiles\editor.dir/objects.a @CMakeFiles\editor.dir\objects1.rsp
-C:\mingw\mingw64\bin\g++.exe -g -Wl,--whole-archive CMakeFiles\editor.dir/objects.a -Wl,--no-whole-archive -o editor.exe -Wl,--out-implib,libeditor.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\editor.dir\linkLibs.rsp

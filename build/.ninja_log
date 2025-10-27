@@ -1,5 +1,0 @@
-# ninja log v7
-133	2004	7824023091902513	CMakeFiles/diag_cli.dir/parser/Parser_void.cpp.obj	e5af5bfa61b294d8
-46	1827	7823438001665522	CMakeFiles/diag_cli.dir/lexer/Lexer.cpp.obj	9f1b27ba2ed4d836
-42	1494	7824027143092358	CMakeFiles/diag_cli.dir/diag_cli.cpp.obj	df730d37a658e8a8
-1495	1760	7824027157617765	diag_cli.exe	8146c7a4391e0484
