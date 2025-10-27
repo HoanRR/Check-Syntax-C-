@@ -41,11 +41,6 @@ static inline bool isSpace(char c)
     return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\v';
 }
 
-static inline bool isSpace(char c)
-{
-    return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\v';
-}
-
 void Lexer::skipSpacesAndComment()
 {
     while (true)
@@ -292,7 +287,6 @@ Token Lexer::makeOperatorOrSymbol()
         return Token(s, TokenType::Symbol, startLine, startCol, 1);
     }
 
-    // Dấu chấm '.' có thể là phần số thực; nhưng tới đây nghĩa là trước đó không phải số => coi là Symbol
     if (c == '.')
     {
         return Token(s, TokenType::Symbol, startLine, startCol, 1);

@@ -1,0 +1,4 @@
+E:/PBL/PBL2/Check-Syntax-C-/build/CMakeFiles/diag_cli.dir
+E:/PBL/PBL2/Check-Syntax-C-/build/CMakeFiles/editor.dir
+E:/PBL/PBL2/Check-Syntax-C-/build/CMakeFiles/edit_cache.dir
+E:/PBL/PBL2/Check-Syntax-C-/build/CMakeFiles/rebuild_cache.dir

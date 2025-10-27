@@ -1,3 +1,4 @@
+#pragma once
 #include "../lexer/Lexer.h"
 #include "../Diagnostic/DiagnosticReporter.h"
 #include "semantics.h"

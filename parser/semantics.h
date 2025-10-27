@@ -1,3 +1,4 @@
+#pragma once
 #include "..\symboltable\symboltable.h"
 #include "..\Diagnostic\DiagnosticReporter.h"
 class semantics

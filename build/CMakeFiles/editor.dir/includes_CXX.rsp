@@ -1,0 +1,1 @@
+-I"C:/SFML-2.5.1-windows-gcc-7.3.0-mingw-64-bit/SFML-2.5.1/include" -I"E:/PBL/PBL2/Check-Syntax-C-/lexer" -I"E:/PBL/PBL2/Check-Syntax-C-/parser" -I"E:/PBL/PBL2/Check-Syntax-C-/Diagnostic" -I"E:/PBL/PBL2/Check-Syntax-C-/symboltable" -I"E:/PBL/PBL2/Check-Syntax-C-/Editor"

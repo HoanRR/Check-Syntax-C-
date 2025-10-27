@@ -1,36 +1,37 @@
-#include "parser/Parser.h"
+#include "UI/UI.h"
 #include <iostream>
-using namespace std;
-int main()
+
+int main(int argc, char *argv[])
 {
-    const string code = R"CODE(int add(int a, int b) {
-int s = a + b;
-if (s >= 0) return s
-else return -s
-}
+    Editor editor;
 
-double x = 1 
-int main() {
-int y = 10;
-while (y > 0) { y = y - 1; 
-if (y == 0) y = y + 30;
-return y;
-})CODE";
-
-    Lexer lex(code);
-    vector<Token> tokens = lex.tokenize();
-
-    // for (const Token &t : tokens)
-    // {
-    //     cout << t.value << " (" << t.line << ":" << t.index << ")\n";
-    // }
-
-    Parser P(tokens);
-    P.parseProgram();
-    if (Parser::ERROR == 0)
+    // Load font - bạn cần có file font (ví dụ: arial.ttf, consolas.ttf)
+    // Có thể download từ: C:/Windows/Fonts/ (Windows)
+    if (!editor.loadFont("UI/monotype-sorts-regular.ttf"))
     {
-        cout << "Parse OK\n";
+        // Thử các font khác
+        if (!editor.loadFont("UI/monotype-sorts-regular.ttf"))
+        {
+            std::cerr << "Không thể load font. Vui lòng cập nhật đường dẫn font." << std::endl;
+            return 1;
+        }
     }
-    
 
+    // Load file nếu có argument
+    if (argc > 1)
+    {
+        editor.loadFile(argv[1]);
+    }
+
+    std::cout << "=== C Syntax Checker Editor ===" << std::endl;
+    std::cout << "Controls:" << std::endl;
+    std::cout << "  - Arrow keys: Di chuyển cursor" << std::endl;
+    std::cout << "  - F5: Kiểm tra cú pháp" << std::endl;
+    std::cout << "  - Type normally: Nhập code" << std::endl;
+    std::cout << "  - Backspace: Xóa ký tự" << std::endl;
+    std::cout << "================================" << std::endl;
+
+    editor.run();
+
+    return 0;
 }

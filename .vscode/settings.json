@@ -1,0 +1,19 @@
+{
+    "files.associations": {
+        "system_error": "cpp",
+        "random": "cpp",
+        "format": "cpp",
+        "fstream": "cpp",
+        "iostream": "cpp",
+        "istream": "cpp",
+        "limits": "cpp",
+        "new": "cpp",
+        "stdexcept": "cpp",
+        "streambuf": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "string": "cpp",
+        "text_encoding": "cpp",
+        "typeinfo": "cpp"
+    }
+}
