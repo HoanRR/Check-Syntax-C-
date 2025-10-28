@@ -6,10 +6,15 @@
 #include <QScrollBar>
 #include <QTextBlock>
 #include <QPainter>
+#include <vector>
+#include <QPaintEvent>
+#include <QTextBlock>
+#include <QPainter>
+#include <QPlainTextEdit>
 
 class LineNumberArea;
 
-class CodeEditor : public QTextEdit
+class CodeEditor : public QPlainTextEdit
 {
     Q_OBJECT
 

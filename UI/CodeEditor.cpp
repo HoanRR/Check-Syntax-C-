@@ -2,14 +2,15 @@
 #include <QAbstractItemView>
 #include <QScrollBar>
 
-CodeEditor::CodeEditor(QWidget *parent) 
-    : QTextEdit(parent), m_completer(nullptr)
+CodeEditor::CodeEditor(QWidget *parent)
+    : QPlainTextEdit(parent), m_completer(nullptr)
 {
     lineNumberArea = new LineNumberArea(this);
 
-    connect(this, &CodeEditor::blockCountChanged, 
+    connect(this, &QPlainTextEdit::blockCountChanged,
             this, &CodeEditor::updateLineNumberAreaWidth);
-    connect(this, &CodeEditor::updateRequest, 
+
+    connect(this, &QPlainTextEdit::updateRequest,
             this, &CodeEditor::updateLineNumberArea);
 
     updateLineNumberAreaWidth(0);
@@ -65,7 +66,7 @@ void CodeEditor::focusInEvent(QFocusEvent *e)
 {
     if (m_completer)
         m_completer->setWidget(this);
-    QTextEdit::focusInEvent(e);
+    QPlainTextEdit::focusInEvent(e);
 }
 
 void CodeEditor::keyPressEvent(QKeyEvent *e)
@@ -108,7 +109,7 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
         if (currentLine.trimmed().endsWith('{'))
             spaces += 4;
 
-        QTextEdit::keyPressEvent(e);
+        QPlainTextEdit::keyPressEvent(e);
         
         // Insert spaces for indent
         cursor = textCursor();
@@ -119,14 +120,14 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
     // Auto-close brackets
     if (e->key() == Qt::Key_BraceLeft)
     {
-        QTextEdit::keyPressEvent(e);
+        QPlainTextEdit::keyPressEvent(e);
         textCursor().insertText("}");
         moveCursor(QTextCursor::Left);
         return;
     }
     if (e->key() == Qt::Key_ParenLeft)
     {
-        QTextEdit::keyPressEvent(e);
+        QPlainTextEdit::keyPressEvent(e);
         textCursor().insertText(")");
         moveCursor(QTextCursor::Left);
         return;
@@ -136,7 +137,7 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
                        e->key() == Qt::Key_Space);
     
     if (!m_completer || !isShortcut)
-        QTextEdit::keyPressEvent(e);
+        QPlainTextEdit::keyPressEvent(e);
 
     const bool ctrlOrShift = e->modifiers().testFlag(Qt::ControlModifier) ||
                              e->modifiers().testFlag(Qt::ShiftModifier);
@@ -224,7 +225,7 @@ void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
 
 void CodeEditor::resizeEvent(QResizeEvent *e)
 {
-    QTextEdit::resizeEvent(e);
+    QPlainTextEdit::resizeEvent(e);
 
     QRect cr = contentsRect();
     lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), 

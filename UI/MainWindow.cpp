@@ -157,8 +157,8 @@ void MainWindow::setupConnections()
 {
     connect(checkButton, &QPushButton::clicked, this, &MainWindow::onCheckCode);
     connect(clearButton, &QPushButton::clicked, this, &MainWindow::onClearAll);
-    connect(codeEditor, &QTextEdit::textChanged, this, &MainWindow::onTextChanged);
-    connect(codeEditor, &QTextEdit::cursorPositionChanged, this, &MainWindow::onCursorPositionChanged);
+    connect(codeEditor, &QPlainTextEdit::textChanged, this, &MainWindow::onTextChanged);
+    connect(codeEditor, &QPlainTextEdit::cursorPositionChanged, this, &MainWindow::onCursorPositionChanged);
     connect(diagnosticList, &QListWidget::itemClicked, this, &MainWindow::onDiagnosticItemClicked);
 }
 

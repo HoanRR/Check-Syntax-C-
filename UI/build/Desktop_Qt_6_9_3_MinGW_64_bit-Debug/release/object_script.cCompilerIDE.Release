@@ -1,0 +1,12 @@
+release/main.o
+release/MainWindow.o
+release/CodeEditor.o
+release/SyntaxHighlighter.o
+release/Lexer.o
+release/Parser_void.o
+release/semantics.o
+release/suggest_engine.o
+release/trie.o
+release/moc_MainWindow.o
+release/moc_CodeEditor.o
+release/moc_SyntaxHighlighter.o

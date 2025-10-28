@@ -1,19 +1,25 @@
 {
-    "files.associations": {
-        "system_error": "cpp",
-        "random": "cpp",
-        "format": "cpp",
-        "fstream": "cpp",
-        "iostream": "cpp",
-        "istream": "cpp",
-        "limits": "cpp",
-        "new": "cpp",
-        "stdexcept": "cpp",
-        "streambuf": "cpp",
-        "functional": "cpp",
-        "tuple": "cpp",
-        "string": "cpp",
-        "text_encoding": "cpp",
-        "typeinfo": "cpp"
-    }
+  // CMake Tools
+  "cmake.configureOnOpen": true,
+  "cmake.buildDirectory": "${workspaceFolder}/build",
+  "cmake.configureSettings": {
+    // Cho CMake biết nơi đặt Qt (kit mingw_64)
+    "CMAKE_PREFIX_PATH": "C:/Qt/6.9.3/mingw_64",
+    // Xuất compile_commands.json để IntelliSense đọc include/defines thật
+    "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+  },
+
+  // Cho cpptools lấy cấu hình trực tiếp từ CMake Tools (tự có includePath/defines)
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+
+  // Fallback (và cũng hữu ích cho nhiều tiện ích khác)
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+
+  // Compiler dùng cho IntelliSense (khớp với kit Qt MinGW bạn chọn)
+  "C_Cpp.default.compilerPath": "C:/Qt/Tools/mingw1310_64/bin/g++.exe",
+  "C_Cpp.default.intelliSenseMode": "windows-gcc-x64",
+  "C_Cpp.default.cppStandard": "c++17",
+
+  // Bật gạch đỏ lỗi IntelliSense
+  "C_Cpp.errorSquiggles": "enabled"
 }

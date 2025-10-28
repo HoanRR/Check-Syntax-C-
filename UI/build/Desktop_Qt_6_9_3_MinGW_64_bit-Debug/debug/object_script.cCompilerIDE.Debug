@@ -1,0 +1,12 @@
+debug/main.o
+debug/MainWindow.o
+debug/CodeEditor.o
+debug/SyntaxHighlighter.o
+debug/Lexer.o
+debug/Parser_void.o
+debug/semantics.o
+debug/suggest_engine.o
+debug/trie.o
+debug/moc_MainWindow.o
+debug/moc_CodeEditor.o
+debug/moc_SyntaxHighlighter.o
