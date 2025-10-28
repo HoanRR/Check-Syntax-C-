@@ -2,6 +2,9 @@
 #include "../lexer/Lexer.h"
 #include "../Diagnostic/DiagnosticReporter.h"
 #include "semantics.h"
+#include <iostream>
+#include <sstream>
+using namespace std;
 class Parser
 {
 public:

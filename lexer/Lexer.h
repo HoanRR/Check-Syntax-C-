@@ -1,6 +1,8 @@
 #pragma once
 #include "Token.h"
 #include <vector>
+#include <unordered_set>
+
 class Lexer
 {
 private:
