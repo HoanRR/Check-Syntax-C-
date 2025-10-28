@@ -1,0 +1,83 @@
+# ==========================================
+# === 1. Build output & intermediate files ==
+# ==========================================
+/build*/
+/bin/
+/obj/
+/out/
+/debug/
+/release/
+
+# Object & compiled files
+*.o
+*.obj
+*.a
+*.lib
+*.dll
+*.so
+*.dylib
+*.exe
+*.pdb
+*.ilk
+*.exp
+*.idb
+
+# ==========================================
+# === 2. CMake generated files ============
+# ==========================================
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+CTestTestfile.cmake
+Testing/
+
+# ==========================================
+# === 3. Qt Creator generated files ========
+# ==========================================
+# User-specific Qt Creator settings
+*.pro.user
+*.pro.user.*
+.qmake.stash
+.qmake.cache
+
+# Auto-generated moc/ui/qrc
+moc_*
+ui_*
+qrc_*
+
+# ==========================================
+# === 4. IDE & Editor configs =============
+# ==========================================
+.vscode/
+.idea/
+*.code-workspace
+
+# ==========================================
+# === 5. Logs, temporary, system ==========
+# ==========================================
+*.log
+*.tmp
+*.bak
+*.cache
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# === 6. External libraries (if local) ====
+# ==========================================
+/SFML-*/
+/mingw*/
+/libs/
+/external/
+
+# ==========================================
+# === 7. Misc optional ====================
+# ==========================================
+# Ignore generated test outputs or JSON logs
+*.json
+*.csv
+*.txt
