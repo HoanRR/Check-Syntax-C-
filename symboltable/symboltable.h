@@ -12,7 +12,7 @@ struct str_Symbol
     bool isFunction = false;
     TypeKind type = TypeKind::Unknown;
     Token tkn;
-    vector<TypeKind> params;
+    // vector<TypeKind> params;
 };
 
 typedef unordered_map<string, str_Symbol> scope;
@@ -39,7 +39,7 @@ public:
 
         if (top.find(sym.name) != top.end())
             return false;
-    
+
         top.emplace(sym.name, std::move(sym));
         return true;
     }

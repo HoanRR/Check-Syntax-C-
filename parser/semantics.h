@@ -13,18 +13,20 @@ class semantics
 
 public:
     semantics();
-    void setReporter(DiagnosticReporter* r);
-    
+    void setReporter(DiagnosticReporter *r);
+
     void enterScope();
     void leaveScope();
-    
-    void beginFunction( TypeKind retKind, const Token &nameTok);
+
+    void beginFunction(TypeKind retKind, const Token &nameTok);
     void endFunction();
-    
-    void declareVar( TypeKind ty, const Token &nameTok);
-    void declareParam( TypeKind ty, const Token &nameTok);
-   
+
+    void declareVar(TypeKind ty, const Token &nameTok);
+    void declareParam(TypeKind ty, const Token &nameTok);
+
     void useIdent(const Token &identTok);
 
     void onReturnToken(const Token &retTok, bool hasExpr);
+
+    void LibraryFunction(const string &name);
 };

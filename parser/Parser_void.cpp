@@ -26,18 +26,6 @@ const Token &Parser::LA(int k)
     return p + k < t.size() ? t[p + k] : t.back();
 }
 
-void Parser::error(const string &msg)
-{
-    ERROR++;
-    if (diag)
-    {
-        diag->syntax(msg, LA().line, LA().col, LA().length);
-    }
-    else
-    {
-        cerr << "[Error] Line " << LA().line << ", Col " << LA().col << ": " << msg << endl;
-    }
-}
 
 void Parser::reportSyntax(const string &msg, const Token &tok)
 {
@@ -231,8 +219,6 @@ bool Parser::lookLikeFunction()
 
 void Parser::parseProgram()
 {
-    if (sem)
-        sem->enterScope();
     while (!isEnd())
     {
         if (lookLikeFunction())

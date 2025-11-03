@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QTextBlock>
 #include "../parser/semantics.h"
+#include "../preprocessor/preprocessor.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
@@ -181,20 +182,58 @@ void MainWindow::onCheckCode()
     QString code = codeEditor->toPlainText();
     std::string srcCode = code.toStdString();
 
-    // Lexer
-    Lexer lexer(srcCode);
+    // Bước 1: Xử lý #include
+    Preprocessor preprocessor;
+    std::vector<std::string> warnings;
+    std::string processedCode = preprocessor.process(srcCode, warnings);
+
+    // Hiển thị cảnh báo từ preprocessor
+    for (const auto &warning : warnings)
+    {
+        QListWidgetItem *item = new QListWidgetItem("⚠️ " + QString::fromStdString(warning));
+        item->setForeground(QColor(245, 124, 0));
+        diagnosticList->addItem(item);
+    }
+
+    // Hiển thị các thư viện đã include thành công
+    const auto &libs = preprocessor.getIncludedLibraries();
+    if (!libs.empty())
+    {
+        QString libList = "✓ Đã nhận diện: ";
+        bool first = true;
+        for (const auto &lib : libs)
+        {
+            if (!first)
+                libList += ", ";
+            libList += QString::fromStdString(lib);
+            first = false;
+        }
+        QListWidgetItem *item = new QListWidgetItem(libList);
+        item->setForeground(QColor(46, 125, 50));
+        diagnosticList->addItem(item);
+    }
+
+    // Bước 2: Lexer
+    Lexer lexer(processedCode);
     std::vector<Token> tokens = lexer.tokenize();
 
-    // Parser with Semantics
+    // Bước 3: Parser với Semantics
     Parser parser(tokens);
     semantics sem;
+    sem.enterScope();
+    vector<string> libIdentifiers = preprocessor.getLibraryIdentifiers();
+    for (const auto &ident : libIdentifiers)
+    {
+        sem.LibraryFunction(ident);
+    }
+
     parser.setSemantics(&sem);
     parser.setDiagnosticReporter(&diagnostics);
     parser.parseProgram();
 
-    // Display diagnostics
+    // Bước 4: Hiển thị kết quả
     const auto &items = diagnostics.all();
-    if (items.empty())
+    if (items.empty() && warnings.empty())
     {
         statusLabel->setText("✓ Không có lỗi");
         statusLabel->setStyleSheet(
@@ -212,15 +251,35 @@ void MainWindow::onCheckCode()
     }
     else
     {
-        statusLabel->setText(QString("✗ Tìm thấy %1 lỗi").arg(items.size()));
-        statusLabel->setStyleSheet(
-            "QLabel {"
-            "  padding: 5px;"
-            "  background-color: #ffebee;"
-            "  border-radius: 3px;"
-            "  color: #c62828;"
-            "  font-weight: bold;"
-            "}");
+        int errorCount = 0;
+        for (const auto &diag : items)
+            if (diag.severity == DiagSeverity::Error)
+                errorCount++;
+
+        if (errorCount > 0)
+        {
+            statusLabel->setText(QString("✗ Tìm thấy %1 lỗi").arg(errorCount));
+            statusLabel->setStyleSheet(
+                "QLabel {"
+                "  padding: 5px;"
+                "  background-color: #ffebee;"
+                "  border-radius: 3px;"
+                "  color: #c62828;"
+                "  font-weight: bold;"
+                "}");
+        }
+        else
+        {
+            statusLabel->setText(QString("⚠ Có %1 cảnh báo").arg(warnings.size()));
+            statusLabel->setStyleSheet(
+                "QLabel {"
+                "  padding: 5px;"
+                "  background-color: #fff3e0;"
+                "  border-radius: 3px;"
+                "  color: #f57c00;"
+                "  font-weight: bold;"
+                "}");
+        }
 
         for (const auto &diag : items)
         {

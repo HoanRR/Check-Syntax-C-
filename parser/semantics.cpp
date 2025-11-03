@@ -1,12 +1,12 @@
 #include "semantics.h"
 
-semantics::semantics(): diag(nullptr),
-      inFunction(false),
-      currentFunc(),
-      currentRet(TypeKind::Void),
-      funcTok("", TokenType::Unknown, 0, 0, 0) {};
+semantics::semantics() : diag(nullptr),
+                         inFunction(false),
+                         currentFunc(),
+                         currentRet(TypeKind::Void),
+                         funcTok("", TokenType::Unknown, 0, 0, 0) {};
 
-void semantics::setReporter(DiagnosticReporter* r)
+void semantics::setReporter(DiagnosticReporter *r)
 {
     diag = r;
 }
@@ -21,7 +21,7 @@ void semantics::leaveScope()
 }
 
 // ===== Hàm =====
-void semantics::beginFunction( TypeKind retKind, const Token &nameTok)
+void semantics::beginFunction(TypeKind retKind, const Token &nameTok)
 {
     inFunction = true;
     currentFunc = nameTok.value;
@@ -50,18 +50,18 @@ void semantics::endFunction()
     }
 }
 
-
-void semantics::declareVar( TypeKind ty, const Token &nameTok)
+void semantics::declareVar(TypeKind ty, const Token &nameTok)
 {
-    str_Symbol s{nameTok.value ,false, ty,  nameTok};
+    str_Symbol s{nameTok.value, false, ty, nameTok};
 
-    if (!sym.declareSymbol(s)) {
-        if (diag) diag->redeclaration(nameTok.value, nameTok.line, nameTok.col, nameTok.length );
+    if (!sym.declareSymbol(s))
+    {
+        if (diag)
+            diag->redeclaration(nameTok.value, nameTok.line, nameTok.col, nameTok.length);
     }
-    
 }
 
-void semantics::declareParam( TypeKind ty, const Token &nameTok)
+void semantics::declareParam(TypeKind ty, const Token &nameTok)
 {
     declareVar(ty, nameTok);
 }
@@ -79,7 +79,7 @@ void semantics::useIdent(const Token &identTok)
 // ===== Return =====
 void semantics::onReturnToken(const Token &retTok, bool hasExpr)
 {
-    
+
     if (currentRet == TypeKind::Void && hasExpr)
     {
         if (diag)
@@ -97,5 +97,18 @@ void semantics::onReturnToken(const Token &retTok, bool hasExpr)
                       "Hàm không phải 'void' cần trả về một biểu thức.",
                       retTok.line, retTok.col, retTok.length);
         }
+    }
+}
+
+void semantics::LibraryFunction(const string &name)
+{
+    Token libToken(name, TokenType::Identifier, 0, 0, name.length());
+
+    str_Symbol s{name, true, TypeKind::Unknown, libToken};
+
+    if (!sym.scopes.empty())
+    {
+        auto &globalScope = sym.scopes[0];
+        globalScope.emplace(name, std::move(s));
     }
 }
