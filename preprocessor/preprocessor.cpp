@@ -102,24 +102,12 @@ vector<string> Preprocessor::getLibraryIdentifiers() const
     {
         if (lib == "iostream")
         {
-            identifiers.insert(identifiers.end(), {"cout", "cin", "cerr", "clog", "endl",
-                                                   "string", "std", "vector", "map", "set"});
+            identifiers.insert(identifiers.end(), {"cout", "cin", "cerr", "clog", "endl"});
         }
         else if (lib == "stdio.h" || lib == "cstdio")
         {
             identifiers.insert(identifiers.end(), {"printf", "scanf", "fprintf", "fscanf", "sprintf", "sscanf",
-                                                   "fopen", "fclose", "fread", "fwrite", "fgets", "fputs",
                                                    "getchar", "putchar", "puts", "FILE"});
-        }
-        else if (lib == "stdlib.h" || lib == "cstdlib")
-        {
-            identifiers.insert(identifiers.end(), {"malloc", "calloc", "realloc", "free", "exit",
-                                                   "atoi", "atof", "atol", "rand", "srand", "abs"});
-        }
-        else if (lib == "string.h" || lib == "cstring")
-        {
-            identifiers.insert(identifiers.end(), {"strlen", "strcpy", "strncpy", "strcat", "strncat",
-                                                   "strcmp", "strncmp", "strchr", "strstr", "memset", "memcpy"});
         }
         else if (lib == "math.h" || lib == "cmath")
         {
@@ -127,25 +115,10 @@ vector<string> Preprocessor::getLibraryIdentifiers() const
                                                    "sqrt", "pow", "exp", "log", "log10", "ceil", "floor",
                                                    "fabs", "abs", "round"});
         }
-        else if (lib == "vector")
-        {
-            identifiers.insert(identifiers.end(), {"vector", "push_back", "pop_back", "size", "empty",
-                                                   "clear", "begin", "end", "front", "back"});
-        }
-        else if (lib == "string")
-        {
-            identifiers.insert(identifiers.end(), {"string", "length", "size", "substr", "find",
-                                                   "c_str", "append", "empty", "clear"});
-        }
         else if (lib == "algorithm")
         {
             identifiers.insert(identifiers.end(), {"sort", "reverse", "max", "min", "swap",
                                                    "find", "binary_search", "lower_bound", "upper_bound"});
-        }
-        else if (lib == "map" || lib == "set")
-        {
-            identifiers.insert(identifiers.end(), {"map", "set", "insert", "erase", "find",
-                                                   "count", "size", "empty", "clear"});
         }
     }
 

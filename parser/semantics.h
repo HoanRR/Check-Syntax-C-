@@ -3,7 +3,6 @@
 #include "..\Diagnostic\DiagnosticReporter.h"
 class semantics
 {
-    SymbolTable sym;
     DiagnosticReporter *diag = nullptr;
 
     bool inFunction = false;
@@ -12,6 +11,7 @@ class semantics
     Token funcTok;
 
 public:
+    SymbolTable sym;
     semantics();
     void setReporter(DiagnosticReporter *r);
 
@@ -29,4 +29,5 @@ public:
     void onReturnToken(const Token &retTok, bool hasExpr);
 
     void LibraryFunction(const string &name);
+    
 };

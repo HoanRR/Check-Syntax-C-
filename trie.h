@@ -4,9 +4,9 @@
 #include <map>
 #include <vector>
 #include <string>
-
+using namespace std;
 struct TrieNode {
-    std::map<char, TrieNode*> children;
+    map<char, TrieNode*> children;
     bool isEnd;
     TrieNode() : isEnd(false) {}
 };
@@ -14,13 +14,13 @@ struct TrieNode {
 class Trie {
 private:
     TrieNode* root;
-    void dfs(TrieNode* node, std::string prefix, std::vector<std::string>& result);
+    void dfs(TrieNode* node, string prefix, vector<string>& result);
 
 public:
     Trie();
-    void insert(const std::string& word);
-    bool search(const std::string& word);
-    std::vector<std::string> getAllWords();
+    void insert(const string& word);
+    bool search(const string& word);
+    vector<string> getAllWords();
 };
 
 #endif // TRIE_H

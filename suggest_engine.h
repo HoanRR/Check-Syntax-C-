@@ -3,8 +3,8 @@
 
 #include <vector>
 #include <string>
-
-int levenshteinDistance(const std::string& s1, const std::string& s2);
-std::vector<std::string> smartSuggestList(const std::string& word, const std::vector<std::string>& dictionary, int maxSuggestions);
+using namespace std;
+int levenshteinDistance(const string& s1, const string& s2);
+vector<string> smartSuggestList(const string& word, const vector<string>& dictionary, int maxSuggestions);
 
 #endif // SUGGEST_ENGINE_H

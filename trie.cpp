@@ -4,7 +4,7 @@ Trie::Trie() {
     root = new TrieNode();
 }
 
-void Trie::insert(const std::string& word) {
+void Trie::insert(const string& word) {
     TrieNode* node = root;
     for(char c : word) {
         if(!node->children.count(c))
@@ -14,7 +14,7 @@ void Trie::insert(const std::string& word) {
     node->isEnd = true;
 }
 
-bool Trie::search(const std::string& word) {
+bool Trie::search(const string& word) {
     TrieNode* node = root;
     for(char c : word) {
         if(!node->children.count(c))
@@ -24,14 +24,14 @@ bool Trie::search(const std::string& word) {
     return node->isEnd;
 }
 
-void Trie::dfs(TrieNode* node, std::string prefix, std::vector<std::string>& result) {
+void Trie::dfs(TrieNode* node, string prefix, vector<string>& result) {
     if(node->isEnd) result.push_back(prefix);
     for(auto& [c, child] : node->children)
         dfs(child, prefix + c, result);
 }
 
-std::vector<std::string> Trie::getAllWords() {
-    std::vector<std::string> result;
+vector<string> Trie::getAllWords() {
+    vector<string> result;
     dfs(root, "", result);
     return result;
 }

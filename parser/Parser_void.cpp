@@ -26,7 +26,6 @@ const Token &Parser::LA(int k)
     return p + k < t.size() ? t[p + k] : t.back();
 }
 
-
 void Parser::reportSyntax(const string &msg, const Token &tok)
 {
     ERROR++;
@@ -346,6 +345,12 @@ void Parser::parseStmt()
         return;
     }
 
+    if (isKw("for"))
+    {
+        parseForStmt();
+        return;
+    }
+
     parseExprStmt();
 }
 
@@ -389,6 +394,32 @@ void Parser::parseWhileStmt()
     expectSym("(");
     parseExpr();
     expectSym(")");
+    parseStmt();
+}
+
+void Parser::parseForStmt()
+{
+    expectKw("for");
+    expectSym("(");
+
+    if (!isSym(";"))
+    {
+        if (lookLikeType())
+            parseDecl();
+        else
+            parseExprStmt();
+    }
+    else
+        expectSym(";");
+
+    if (!isSym(";"))
+        parseExpr();
+    expectSym(";");
+
+    if (!isSym(")"))
+        parseExpr();
+    expectSym(")");
+
     parseStmt();
 }
 

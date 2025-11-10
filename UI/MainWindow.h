@@ -6,6 +6,8 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QCompleter>
+#include <QTimer>
+#include <QCheckBox>
 #include <QStringListModel>
 #include "CodeEditor.h"
 #include "../lexer/Lexer.h"
@@ -35,18 +37,26 @@ private:
     void updateSuggestions(const QString &prefix, int cursorPos);
     void highlightErrors();
     void populateDictionary();
+    void updateDeclaredSymbols();
+    void updateDictionaryFromCode();
 
+    void onAutoCheckToggled(int);
+    void performAutoCheck();
     // UI Components
     CodeEditor *codeEditor;
     QListWidget *diagnosticList;
     QLabel *statusLabel;
     QPushButton *checkButton;
     QPushButton *clearButton;
+    QTimer *autoCheckTimer;
+    QCheckBox *autoCheckBox;
 
     // Data
     DiagnosticReporter diagnostics;
     Trie dictionary;
     std::vector<std::string> keywords;
+    std::vector<std::string> declaredSymbols;
     QCompleter *completer;
     QStringListModel *completerModel;
+    semantics currentSemantics;
 };

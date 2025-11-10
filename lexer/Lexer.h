@@ -17,10 +17,10 @@ private:
     bool isIdentStart(char);
     bool isIdentCont(char);
     bool isOperatorChar(char);
-    static bool isDigit(char c);
-    static bool isHexDigit(char c);
-    static bool isOctDigit(char c);
-    static bool isBinDigit(char c);
+    static bool isDigit(char );
+    static bool isHexDigit(char );
+    static bool isOctDigit(char );
+    static bool isBinDigit(char );
 
     Token makeIdentifier();
     Token makeNumber();

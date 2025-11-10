@@ -14,8 +14,7 @@ CodeEditor::CodeEditor(QWidget *parent)
             this, &CodeEditor::updateLineNumberArea);
 
     updateLineNumberAreaWidth(0);
-    
-    setTabStopDistance(40); // 4 spaces for tab
+
 }
 
 CodeEditor::~CodeEditor() {}
@@ -33,7 +32,7 @@ void CodeEditor::setCompleter(QCompleter *completer)
     m_completer->setWidget(this);
     m_completer->setCompletionMode(QCompleter::PopupCompletion);
     m_completer->setCaseSensitivity(Qt::CaseInsensitive);
-    
+
     connect(m_completer, QOverload<const QString &>::of(&QCompleter::activated),
             this, &CodeEditor::insertCompletion);
 }
@@ -88,11 +87,17 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
     }
 
     // Auto-indent
+    if (e->key() == Qt::Key_Tab)
+    {
+        insertPlainText("    "); // 4 spaces
+        return;
+    }
+
     if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
     {
         QTextCursor cursor = textCursor();
         QString currentLine = cursor.block().text();
-        
+
         // Count leading spaces
         int spaces = 0;
         for (QChar c : currentLine)
@@ -100,17 +105,17 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
             if (c == ' ')
                 spaces++;
             else if (c == '\t')
-                spaces += 4;
+                spaces += 2;
             else
                 break;
         }
 
         // Add extra indent after {
         if (currentLine.trimmed().endsWith('{'))
-            spaces += 4;
+            spaces += 2;
 
         QPlainTextEdit::keyPressEvent(e);
-        
+
         // Insert spaces for indent
         cursor = textCursor();
         cursor.insertText(QString(spaces, ' '));
@@ -133,15 +138,15 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
         return;
     }
 
-    bool isShortcut = (e->modifiers().testFlag(Qt::ControlModifier) && 
+    bool isShortcut = (e->modifiers().testFlag(Qt::ControlModifier) &&
                        e->key() == Qt::Key_Space);
-    
+
     if (!m_completer || !isShortcut)
         QPlainTextEdit::keyPressEvent(e);
 
     const bool ctrlOrShift = e->modifiers().testFlag(Qt::ControlModifier) ||
                              e->modifiers().testFlag(Qt::ShiftModifier);
-    
+
     if (!m_completer || (ctrlOrShift && e->text().isEmpty()))
         return;
 
@@ -163,8 +168,7 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
     if (m_completer->completionCount() > 0)
     {
         QRect cr = cursorRect();
-        cr.setWidth(m_completer->popup()->sizeHintForColumn(0)
-                    + m_completer->popup()->verticalScrollBar()->sizeHint().width());
+        cr.setWidth(m_completer->popup()->sizeHintForColumn(0) + m_completer->popup()->verticalScrollBar()->sizeHint().width());
         m_completer->complete(cr);
     }
 }
@@ -172,11 +176,11 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
 void CodeEditor::highlightLine(int line, int col, int length, const QColor &color)
 {
     highlights.push_back({line, col, length, color});
-    
+
     QTextCursor cursor(document()->findBlockByLineNumber(line - 1));
     cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, col - 1);
     cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, length);
-    
+
     QTextCharFormat fmt;
     fmt.setBackground(color);
     cursor.setCharFormat(fmt);
@@ -185,7 +189,7 @@ void CodeEditor::highlightLine(int line, int col, int length, const QColor &colo
 void CodeEditor::clearHighlights()
 {
     highlights.clear();
-    
+
     QTextCursor cursor(document());
     cursor.select(QTextCursor::Document);
     QTextCharFormat fmt;
@@ -198,7 +202,8 @@ int CodeEditor::lineNumberAreaWidth()
 {
     int digits = 1;
     int max = qMax(1, document()->blockCount());
-    while (max >= 10) {
+    while (max >= 10)
+    {
         max /= 10;
         ++digits;
     }
@@ -228,7 +233,7 @@ void CodeEditor::resizeEvent(QResizeEvent *e)
     QPlainTextEdit::resizeEvent(e);
 
     QRect cr = contentsRect();
-    lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), 
+    lineNumberArea->setGeometry(QRect(cr.left(), cr.top(),
                                       lineNumberAreaWidth(), cr.height()));
 }
 
@@ -242,13 +247,15 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
     int top = qRound(blockBoundingGeometry(block).translated(contentOffset()).top());
     int bottom = top + qRound(blockBoundingRect(block).height());
 
-    while (block.isValid() && top <= event->rect().bottom()) {
-        if (block.isVisible() && bottom >= event->rect().top()) {
+    while (block.isValid() && top <= event->rect().bottom())
+    {
+        if (block.isVisible() && bottom >= event->rect().top())
+        {
             QString number = QString::number(blockNumber + 1);
             painter.setPen(QColor(120, 120, 120));
-            painter.drawText(0, top, lineNumberArea->width() - 5, 
-                           fontMetrics().height(),
-                           Qt::AlignRight, number);
+            painter.drawText(0, top, lineNumberArea->width() - 5,
+                             fontMetrics().height(),
+                             Qt::AlignRight, number);
         }
 
         block = block.next();

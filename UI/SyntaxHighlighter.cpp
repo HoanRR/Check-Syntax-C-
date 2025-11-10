@@ -10,13 +10,36 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument *parent)
     keywordFormat.setFontWeight(QFont::Bold);
 
     QStringList keywordPatterns = {
-        "\\bint\\b", "\\bfloat\\b", "\\bdouble\\b", "\\bchar\\b",
-        "\\blong\\b", "\\bvoid\\b", "\\breturn\\b", "\\bif\\b",
-        "\\belse\\b", "\\bwhile\\b", "\\bfor\\b", "\\bconst\\b",
-        "\\bstruct\\b", "\\btypedef\\b", "\\benum\\b", "\\bunion\\b",
-        "\\bstatic\\b", "\\bextern\\b", "\\bauto\\b", "\\bregister\\b",
-        "\\bsizeof\\b", "\\bbreak\\b", "\\bcontinue\\b", "\\bswitch\\b",
-        "\\bcase\\b", "\\bdefault\\b", "\\bgoto\\b", "\\bdo\\b"};
+        "\\bint\\b",
+        "\\bfloat\\b",
+        "\\bdouble\\b",
+        "\\bchar\\b",
+        "\\blong\\b",
+        "\\bvoid\\b",
+        "\\breturn\\b",
+        "\\bif\\b",
+        "\\belse\\b",
+        "\\bwhile\\b",
+        "\\bfor\\b",
+        "\\bconst\\b",
+        "\\bstruct\\b",
+        "\\btypedef\\b",
+        "\\benum\\b",
+        "\\bunion\\b",
+        "\\bstatic\\b",
+        "\\bextern\\b",
+        "\\bauto\\b",
+        "\\bregister\\b",
+        "\\bsizeof\\b",
+        "\\bbreak\\b",
+        "\\bcontinue\\b",
+        "\\bswitch\\b",
+        "\\bcase\\b",
+        "\\bdefault\\b",
+        "\\bgoto\\b",
+        "\\bdo\\b",
+        "\\binclude\\b",
+    };
 
     for (const QString &pattern : keywordPatterns)
     {

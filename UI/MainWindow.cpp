@@ -13,6 +13,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setupUI();
     setupConnections();
     populateDictionary();
+
+    // Setup auto-check timer
+    autoCheckTimer = new QTimer(this);
+    autoCheckTimer->setSingleShot(true);
+    connect(autoCheckTimer, &QTimer::timeout, this, &MainWindow::performAutoCheck);
 }
 
 MainWindow::~MainWindow() {}
@@ -67,8 +72,14 @@ void MainWindow::setupUI()
         "  background-color: #c41e14;"
         "}");
 
+    // Auto-check checkbox
+    autoCheckBox = new QCheckBox("Tự động kiểm tra", this);
+    autoCheckBox->setChecked(true);
+    autoCheckBox->setStyleSheet("font-size: 13px; padding: 5px;");
+
     buttonLayout->addWidget(checkButton);
     buttonLayout->addWidget(clearButton);
+    buttonLayout->addWidget(autoCheckBox);
     buttonLayout->addStretch();
 
     mainLayout->addLayout(buttonLayout);
@@ -161,25 +172,65 @@ void MainWindow::setupConnections()
     connect(codeEditor, &QPlainTextEdit::textChanged, this, &MainWindow::onTextChanged);
     connect(codeEditor, &QPlainTextEdit::cursorPositionChanged, this, &MainWindow::onCursorPositionChanged);
     connect(diagnosticList, &QListWidget::itemClicked, this, &MainWindow::onDiagnosticItemClicked);
+    connect(autoCheckBox, &QCheckBox::stateChanged, this, &MainWindow::onAutoCheckToggled);
 }
 
 void MainWindow::populateDictionary()
 {
     keywords = {"int", "float", "double", "char", "long", "void",
                 "return", "if", "else", "while", "for", "const",
-                "main", "printf", "scanf"};
+                "main", "printf", "scanf", "struct", "typedef",
+                "break", "continue", "switch", "case", "default"};
 
+    // Thêm keywords vào dictionary
     for (const auto &kw : keywords)
         dictionary.insert(kw);
 }
 
-void MainWindow::onCheckCode()
+void MainWindow::updateDictionaryFromCode()
 {
+    // Lấy tất cả text từ editor
+    QString code = codeEditor->toPlainText();
+    std::string srcCode = code.toStdString();
+
+    // Tokenize để lấy tất cả identifiers
+    Lexer lexer(srcCode);
+    std::vector<Token> tokens = lexer.tokenize();
+
+    // Thêm tất cả identifiers vào dictionary
+    for (const auto &token : tokens)
+    {
+        if (token.type == TokenType::Identifier)
+        {
+            dictionary.insert(token.value);
+        }
+    }
+}
+
+void MainWindow::performAutoCheck()
+{
+    // Kiểm tra nếu code rỗng hoặc quá ngắn thì không check
+    QString code = codeEditor->toPlainText().trimmed();
+    if (code.isEmpty() || code.length() < 10)
+    {
+        diagnosticList->clear();
+        codeEditor->clearHighlights();
+        statusLabel->setText("Sẵn sàng");
+        statusLabel->setStyleSheet(
+            "QLabel {"
+            "  padding: 5px;"
+            "  background-color: #e8f5e9;"
+            "  border-radius: 3px;"
+            "  font-size: 12px;"
+            "}");
+        return;
+    }
+
+    // Thực hiện kiểm tra
     diagnostics.clear();
     diagnosticList->clear();
     codeEditor->clearHighlights();
 
-    QString code = codeEditor->toPlainText();
     std::string srcCode = code.toStdString();
 
     // Bước 1: Xử lý #include
@@ -225,11 +276,16 @@ void MainWindow::onCheckCode()
     for (const auto &ident : libIdentifiers)
     {
         sem.LibraryFunction(ident);
+        // Thêm library functions vào dictionary
+        dictionary.insert(ident);
     }
 
     parser.setSemantics(&sem);
     parser.setDiagnosticReporter(&diagnostics);
     parser.parseProgram();
+
+    // Cập nhật dictionary với các identifiers từ code
+    updateDictionaryFromCode();
 
     // Bước 4: Hiển thị kết quả
     const auto &items = diagnostics.all();
@@ -307,6 +363,16 @@ void MainWindow::onCheckCode()
     }
 }
 
+void MainWindow::onCheckCode()
+{
+    // Dừng timer nếu đang chạy
+    if (autoCheckTimer->isActive())
+        autoCheckTimer->stop();
+
+    // Thực hiện kiểm tra ngay lập tức
+    performAutoCheck();
+}
+
 void MainWindow::highlightErrors()
 {
     const auto &items = diagnostics.all();
@@ -321,8 +387,14 @@ void MainWindow::highlightErrors()
 
 void MainWindow::onTextChanged()
 {
-    // Real-time syntax highlighting (simple version)
-    // For production, use QSyntaxHighlighter
+    // Nếu auto-check được bật, reset timer
+    if (autoCheckBox->isChecked())
+    {
+        // Dừng timer hiện tại
+        autoCheckTimer->stop();
+        // Khởi động lại timer với delay 1500ms (1.5 giây)
+        autoCheckTimer->start(1500);
+    }
 }
 
 void MainWindow::onCursorPositionChanged()
@@ -342,21 +414,54 @@ void MainWindow::updateSuggestions(const QString &prefix, int cursorPos)
     std::string prefixStr = prefix.toStdString();
     std::vector<std::string> allWords = dictionary.getAllWords();
 
-    auto suggestions = smartSuggestList(prefixStr, allWords, 10);
-
-    QStringList suggestionList;
-    for (const auto &s : suggestions)
-        suggestionList << QString::fromStdString(s);
-
-    if (!suggestionList.isEmpty())
+    // Tìm các từ bắt đầu bằng prefix (exact match có độ ưu tiên cao hơn)
+    std::vector<std::string> exactMatches;
+    for (const auto &word : allWords)
     {
+        if (word.size() >= prefixStr.size() &&
+            word.substr(0, prefixStr.size()) == prefixStr)
+        {
+            exactMatches.push_back(word);
+        }
+    }
+
+    // Nếu không có exact match, dùng fuzzy matching
+    if (exactMatches.empty())
+    {
+        auto suggestions = smartSuggestList(prefixStr, allWords, 10);
+        QStringList suggestionList;
+        for (const auto &s : suggestions)
+            suggestionList << QString::fromStdString(s);
+
+        if (!suggestionList.isEmpty())
+        {
+            completerModel->setStringList(suggestionList);
+            completer->setCompletionPrefix(prefix);
+
+            if (completer->completionCount() > 0)
+            {
+                QRect cr = codeEditor->cursorRect();
+                cr.setWidth(completer->popup()->sizeHintForColumn(0) +
+                            completer->popup()->verticalScrollBar()->sizeHint().width());
+                completer->complete(cr);
+            }
+        }
+    }
+    else
+    {
+        // Sử dụng exact matches
+        QStringList suggestionList;
+        for (const auto &s : exactMatches)
+            suggestionList << QString::fromStdString(s);
+
         completerModel->setStringList(suggestionList);
         completer->setCompletionPrefix(prefix);
 
         if (completer->completionCount() > 0)
         {
             QRect cr = codeEditor->cursorRect();
-            cr.setWidth(completer->popup()->sizeHintForColumn(0) + completer->popup()->verticalScrollBar()->sizeHint().width());
+            cr.setWidth(completer->popup()->sizeHintForColumn(0) +
+                        completer->popup()->verticalScrollBar()->sizeHint().width());
             completer->complete(cr);
         }
     }
@@ -376,12 +481,37 @@ void MainWindow::onDiagnosticItemClicked(QListWidgetItem *item)
     codeEditor->setFocus();
 }
 
+void MainWindow::onAutoCheckToggled(int state)
+{
+    if (state == Qt::Checked)
+    {
+        // Bật auto-check, trigger kiểm tra ngay
+        autoCheckTimer->start(1500);
+        statusLabel->setText("✓ Đã bật tự động kiểm tra");
+    }
+    else
+    {
+        // Tắt auto-check, dừng timer
+        autoCheckTimer->stop();
+        statusLabel->setText("✗ Đã tắt tự động kiểm tra");
+    }
+}
+
 void MainWindow::onClearAll()
 {
+    // Dừng timer
+    if (autoCheckTimer->isActive())
+        autoCheckTimer->stop();
+
     codeEditor->clear();
     diagnosticList->clear();
     diagnostics.clear();
     codeEditor->clearHighlights();
+
+    // Reset dictionary về keywords ban đầu
+    dictionary = Trie();
+    populateDictionary();
+
     statusLabel->setText("Sẵn sàng");
     statusLabel->setStyleSheet(
         "QLabel {"

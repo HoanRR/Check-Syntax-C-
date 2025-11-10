@@ -42,7 +42,7 @@ public:
 
     void redeclaration(const string &name, int line, int col, int len)
     {
-        add(DiagSeverity::Error, "E2", "Biến " + name + " đã được khai báo trong phạm vi này", line, col, len);
+        add(DiagSeverity::Warning, "W1", "Biến " + name + " đã được khai báo trong phạm vi này", line, col, len);
     }
     void typeMismatch(const string &fromT, const string &toT, int line, int col, int len)
     {
