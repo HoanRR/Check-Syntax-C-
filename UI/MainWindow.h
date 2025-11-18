@@ -5,15 +5,12 @@
 #include <QSplitter>
 #include <QPushButton>
 #include <QLabel>
-#include <QCompleter>
 #include <QTimer>
 #include <QCheckBox>
-#include <QStringListModel>
 #include "CodeEditor.h"
 #include "../lexer/Lexer.h"
 #include "../parser/Parser.h"
 #include "../Diagnostic/DiagnosticReporter.h"
-#include "../suggest_engine.h"
 #include "../trie.h"
 
 class MainWindow : public QMainWindow
@@ -30,18 +27,17 @@ private slots:
     void onCursorPositionChanged();
     void onDiagnosticItemClicked(QListWidgetItem *item);
     void onClearAll();
+    void onAutoCheckToggled(int);
 
 private:
     void setupUI();
     void setupConnections();
-    void updateSuggestions(const QString &prefix, int cursorPos);
+    void updateSuggestions();
     void highlightErrors();
     void populateDictionary();
-    void updateDeclaredSymbols();
     void updateDictionaryFromCode();
-
-    void onAutoCheckToggled(int);
     void performAutoCheck();
+
     // UI Components
     CodeEditor *codeEditor;
     QListWidget *diagnosticList;
@@ -55,8 +51,5 @@ private:
     DiagnosticReporter diagnostics;
     Trie dictionary;
     std::vector<std::string> keywords;
-    std::vector<std::string> declaredSymbols;
-    QCompleter *completer;
-    QStringListModel *completerModel;
     semantics currentSemantics;
 };

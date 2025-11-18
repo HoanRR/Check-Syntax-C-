@@ -1,11 +1,19 @@
 #include "CodeEditor.h"
+#include "SuggestionWidget.h"
 #include <QAbstractItemView>
 #include <QScrollBar>
 
 CodeEditor::CodeEditor(QWidget *parent)
-    : QPlainTextEdit(parent), m_completer(nullptr)
+    : QPlainTextEdit(parent)
 {
     lineNumberArea = new LineNumberArea(this);
+
+    // Tạo suggestion widget
+    suggestionWidget = new SuggestionWidget(this);
+    suggestionWidget->hide();
+
+    connect(suggestionWidget, &SuggestionWidget::suggestionSelected,
+            this, &CodeEditor::insertSuggestion);
 
     connect(this, &QPlainTextEdit::blockCountChanged,
             this, &CodeEditor::updateLineNumberAreaWidth);
@@ -14,44 +22,59 @@ CodeEditor::CodeEditor(QWidget *parent)
             this, &CodeEditor::updateLineNumberArea);
 
     updateLineNumberAreaWidth(0);
-
 }
 
 CodeEditor::~CodeEditor() {}
 
-void CodeEditor::setCompleter(QCompleter *completer)
+void CodeEditor::showSuggestions(const QStringList &suggestions, const QString &prefix)
 {
-    if (m_completer)
-        m_completer->disconnect(this);
-
-    m_completer = completer;
-
-    if (!m_completer)
+    if (suggestions.isEmpty())
+    {
+        suggestionWidget->hide();
         return;
+    }
 
-    m_completer->setWidget(this);
-    m_completer->setCompletionMode(QCompleter::PopupCompletion);
-    m_completer->setCaseSensitivity(Qt::CaseInsensitive);
+    currentPrefix = prefix;
+    suggestionWidget->clear();
+    suggestionWidget->addItems(suggestions);
 
-    connect(m_completer, QOverload<const QString &>::of(&QCompleter::activated),
-            this, &CodeEditor::insertCompletion);
+    // Đặt vị trí popup ngay dưới con trỏ
+    QRect cr = cursorRect();
+    QPoint globalPos = mapToGlobal(cr.bottomLeft());
+
+    suggestionWidget->move(globalPos);
+    suggestionWidget->setFixedWidth(250);
+
+    // Tính toán chiều cao dựa trên số lượng items
+    int itemHeight = suggestionWidget->sizeHintForRow(0);
+    int height = qMin(200, itemHeight * suggestions.count() + 10);
+    suggestionWidget->setFixedHeight(height);
+
+    suggestionWidget->setCurrentRow(0);
+    suggestionWidget->show();
+    suggestionWidget->setFocus(Qt::PopupFocusReason);
 }
 
-QCompleter *CodeEditor::completer() const
+void CodeEditor::hideSuggestions()
 {
-    return m_completer;
+    suggestionWidget->hide();
+    currentPrefix.clear();
 }
 
-void CodeEditor::insertCompletion(const QString &completion)
+void CodeEditor::insertSuggestion(const QString &text)
 {
-    if (m_completer->widget() != this)
-        return;
-
     QTextCursor tc = textCursor();
-    tc.select(QTextCursor::WordUnderCursor);
+
+    // Xóa prefix đã gõ
+    tc.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, currentPrefix.length());
     tc.removeSelectedText();
-    tc.insertText(completion);
+
+    // Chèn suggestion
+    tc.insertText(text);
     setTextCursor(tc);
+
+    hideSuggestions();
+    setFocus();
 }
 
 QString CodeEditor::textUnderCursor() const
@@ -63,42 +86,60 @@ QString CodeEditor::textUnderCursor() const
 
 void CodeEditor::focusInEvent(QFocusEvent *e)
 {
-    if (m_completer)
-        m_completer->setWidget(this);
     QPlainTextEdit::focusInEvent(e);
+}
+
+void CodeEditor::focusOutEvent(QFocusEvent *e)
+{
+    // Chỉ ẩn suggestion nếu focus không chuyển sang suggestion widget
+    if (e->reason() != Qt::PopupFocusReason)
+    {
+        hideSuggestions();
+    }
+    QPlainTextEdit::focusOutEvent(e);
 }
 
 void CodeEditor::keyPressEvent(QKeyEvent *e)
 {
-    if (m_completer && m_completer->popup()->isVisible())
+    // Nếu suggestion widget đang hiển thị
+    if (suggestionWidget->isVisible())
     {
-        switch (e->key())
+        // Các phím điều hướng và chọn
+        if (e->key() == Qt::Key_Up || e->key() == Qt::Key_Down ||
+            e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
         {
-        case Qt::Key_Enter:
-        case Qt::Key_Return:
-        case Qt::Key_Escape:
-        case Qt::Key_Tab:
-        case Qt::Key_Backtab:
-            e->ignore();
+            suggestionWidget->event(e);
             return;
-        default:
-            break;
+        }
+        else if (e->key() == Qt::Key_Escape)
+        {
+            hideSuggestions();
+            return;
+        }
+        // Các phím khác sẽ ẩn suggestion và xử lý bình thường
+        else if (e->key() == Qt::Key_Space ||
+                 e->key() == Qt::Key_Semicolon ||
+                 e->key() == Qt::Key_ParenLeft ||
+                 e->key() == Qt::Key_ParenRight)
+        {
+            hideSuggestions();
         }
     }
 
-    // Auto-indent
+    // Auto-indent với Tab
     if (e->key() == Qt::Key_Tab)
     {
         insertPlainText("    "); // 4 spaces
         return;
     }
 
+    // Auto-indent với Enter
     if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
     {
         QTextCursor cursor = textCursor();
         QString currentLine = cursor.block().text();
 
-        // Count leading spaces
+        // Đếm số khoảng trắng đầu dòng
         int spaces = 0;
         for (QChar c : currentLine)
         {
@@ -110,13 +151,13 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
                 break;
         }
 
-        // Add extra indent after {
+        // Thêm indent nếu dòng kết thúc bằng {
         if (currentLine.trimmed().endsWith('{'))
-            spaces += 2;
+            spaces += 4;
 
         QPlainTextEdit::keyPressEvent(e);
 
-        // Insert spaces for indent
+        // Chèn khoảng trắng cho indent
         cursor = textCursor();
         cursor.insertText(QString(spaces, ' '));
         return;
@@ -138,39 +179,11 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
         return;
     }
 
-    bool isShortcut = (e->modifiers().testFlag(Qt::ControlModifier) &&
-                       e->key() == Qt::Key_Space);
+    // Xử lý phím bình thường
+    QPlainTextEdit::keyPressEvent(e);
 
-    if (!m_completer || !isShortcut)
-        QPlainTextEdit::keyPressEvent(e);
-
-    const bool ctrlOrShift = e->modifiers().testFlag(Qt::ControlModifier) ||
-                             e->modifiers().testFlag(Qt::ShiftModifier);
-
-    if (!m_completer || (ctrlOrShift && e->text().isEmpty()))
-        return;
-
-    QString completionPrefix = textUnderCursor();
-
-    if (!isShortcut && (e->text().isEmpty() || completionPrefix.length() < 2))
-    {
-        m_completer->popup()->hide();
-        return;
-    }
-
-    if (completionPrefix != m_completer->completionPrefix())
-    {
-        m_completer->setCompletionPrefix(completionPrefix);
-        m_completer->popup()->setCurrentIndex(
-            m_completer->completionModel()->index(0, 0));
-    }
-
-    if (m_completer->completionCount() > 0)
-    {
-        QRect cr = cursorRect();
-        cr.setWidth(m_completer->popup()->sizeHintForColumn(0) + m_completer->popup()->verticalScrollBar()->sizeHint().width());
-        m_completer->complete(cr);
-    }
+    // Sau khi xử lý phím, kiểm tra xem có cần hiện suggestion không
+    // Trigger suggestion sẽ được xử lý bởi MainWindow qua signal textChanged
 }
 
 void CodeEditor::highlightLine(int line, int col, int length, const QColor &color)

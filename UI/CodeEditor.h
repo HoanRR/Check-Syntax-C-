@@ -1,18 +1,13 @@
 #pragma once
-#include <QTextEdit>
-#include <QCompleter>
+#include <QPlainTextEdit>
 #include <QKeyEvent>
-#include <QAbstractItemView>
-#include <QScrollBar>
 #include <QTextBlock>
 #include <QPainter>
 #include <vector>
 #include <QPaintEvent>
-#include <QTextBlock>
-#include <QPainter>
-#include <QPlainTextEdit>
 
 class LineNumberArea;
+class SuggestionWidget;
 
 class CodeEditor : public QPlainTextEdit
 {
@@ -22,9 +17,9 @@ public:
     CodeEditor(QWidget *parent = nullptr);
     ~CodeEditor();
 
-    void setCompleter(QCompleter *c);
-    QCompleter *completer() const;
-    
+    void showSuggestions(const QStringList &suggestions, const QString &prefix);
+    void hideSuggestions();
+
     void highlightLine(int line, int col, int length, const QColor &color);
     void clearHighlights();
 
@@ -35,19 +30,22 @@ protected:
     void keyPressEvent(QKeyEvent *e) override;
     void focusInEvent(QFocusEvent *e) override;
     void resizeEvent(QResizeEvent *event) override;
+    void focusOutEvent(QFocusEvent *e) override;
 
 private slots:
-    void insertCompletion(const QString &completion);
+    void insertSuggestion(const QString &text);
     void updateLineNumberAreaWidth(int newBlockCount);
     void updateLineNumberArea(const QRect &rect, int dy);
 
 private:
     QString textUnderCursor() const;
-    
-    QCompleter *m_completer;
+
+    SuggestionWidget *suggestionWidget;
     QWidget *lineNumberArea;
-    
-    struct Highlight {
+    QString currentPrefix;
+
+    struct Highlight
+    {
         int line;
         int col;
         int length;
@@ -62,12 +60,14 @@ class LineNumberArea : public QWidget
 public:
     LineNumberArea(CodeEditor *editor) : QWidget(editor), codeEditor(editor) {}
 
-    QSize sizeHint() const override {
+    QSize sizeHint() const override
+    {
         return QSize(codeEditor->lineNumberAreaWidth(), 0);
     }
 
 protected:
-    void paintEvent(QPaintEvent *event) override {
+    void paintEvent(QPaintEvent *event) override
+    {
         codeEditor->lineNumberAreaPaintEvent(event);
     }
 

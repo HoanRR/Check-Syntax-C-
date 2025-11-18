@@ -22,7 +22,6 @@ set(SRC
     lexer/Lexer.cpp
     parser/Parser_void.cpp
     parser/semantics.cpp
-    suggest_engine.cpp
     trie.cpp
 )
 
@@ -31,6 +30,7 @@ set(HDR
     preprocessor/preprocessor.h
     UI/MainWindow.h
     UI/CodeEditor.h
+    UI/SuggestionWidget.h
     UI/SyntaxHighlighter.h
     lexer/Lexer.h
     lexer/Token.h
@@ -40,7 +40,6 @@ set(HDR
     Diagnostic/DiagnosticsJSON.h
     symboltable/symboltable.h
     symboltable/type.h
-    suggest_engine.h
     trie.h
 )
 

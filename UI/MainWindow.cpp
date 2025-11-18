@@ -100,13 +100,6 @@ void MainWindow::setupUI()
         "  background-color: #ffffff;"
         "}");
 
-    // Setup completer
-    completerModel = new QStringListModel(this);
-    completer = new QCompleter(completerModel, this);
-    completer->setCaseSensitivity(Qt::CaseInsensitive);
-    completer->setCompletionMode(QCompleter::PopupCompletion);
-    codeEditor->setCompleter(completer);
-
     // Add syntax highlighter
     new SyntaxHighlighter(codeEditor->document());
 
@@ -180,7 +173,7 @@ void MainWindow::populateDictionary()
     keywords = {"int", "float", "double", "char", "long", "void",
                 "return", "if", "else", "while", "for", "const",
                 "main", "printf", "scanf", "struct", "typedef",
-                "break", "continue", "switch", "case", "default"};
+                "break", "continue", "switch", "case", "default", "include"};
 
     // Thêm keywords vào dictionary
     for (const auto &kw : keywords)
@@ -204,6 +197,40 @@ void MainWindow::updateDictionaryFromCode()
         {
             dictionary.insert(token.value);
         }
+    }
+}
+
+void MainWindow::updateSuggestions()
+{
+    QTextCursor cursor = codeEditor->textCursor();
+    cursor.select(QTextCursor::WordUnderCursor);
+    QString word = cursor.selectedText();
+
+    if (word.length() < 2)
+    {
+        codeEditor->hideSuggestions();
+        return;
+    }
+
+    // Tìm các từ có prefix khớp
+    std::string prefix = word.toStdString();
+    std::vector<std::string> suggestions = dictionary.findWordsWithPrefix(prefix);
+
+    // Chuyển đổi sang QStringList
+    QStringList suggestionList;
+    for (const auto &s : suggestions)
+    {
+        if (s != prefix)
+            suggestionList << QString::fromStdString(s);
+    }
+
+    if (!suggestionList.isEmpty())
+    {
+        codeEditor->showSuggestions(suggestionList, word);
+    }
+    else
+    {
+        codeEditor->hideSuggestions();
     }
 }
 
@@ -390,81 +417,15 @@ void MainWindow::onTextChanged()
     // Nếu auto-check được bật, reset timer
     if (autoCheckBox->isChecked())
     {
-        // Dừng timer hiện tại
         autoCheckTimer->stop();
-        // Khởi động lại timer với delay 1500ms (1.5 giây)
         autoCheckTimer->start(1500);
     }
 }
 
 void MainWindow::onCursorPositionChanged()
 {
-    QTextCursor cursor = codeEditor->textCursor();
-    cursor.select(QTextCursor::WordUnderCursor);
-    QString word = cursor.selectedText();
-
-    if (word.length() >= 2)
-    {
-        updateSuggestions(word, cursor.position());
-    }
-}
-
-void MainWindow::updateSuggestions(const QString &prefix, int cursorPos)
-{
-    std::string prefixStr = prefix.toStdString();
-    std::vector<std::string> allWords = dictionary.getAllWords();
-
-    // Tìm các từ bắt đầu bằng prefix (exact match có độ ưu tiên cao hơn)
-    std::vector<std::string> exactMatches;
-    for (const auto &word : allWords)
-    {
-        if (word.size() >= prefixStr.size() &&
-            word.substr(0, prefixStr.size()) == prefixStr)
-        {
-            exactMatches.push_back(word);
-        }
-    }
-
-    // Nếu không có exact match, dùng fuzzy matching
-    if (exactMatches.empty())
-    {
-        auto suggestions = smartSuggestList(prefixStr, allWords, 10);
-        QStringList suggestionList;
-        for (const auto &s : suggestions)
-            suggestionList << QString::fromStdString(s);
-
-        if (!suggestionList.isEmpty())
-        {
-            completerModel->setStringList(suggestionList);
-            completer->setCompletionPrefix(prefix);
-
-            if (completer->completionCount() > 0)
-            {
-                QRect cr = codeEditor->cursorRect();
-                cr.setWidth(completer->popup()->sizeHintForColumn(0) +
-                            completer->popup()->verticalScrollBar()->sizeHint().width());
-                completer->complete(cr);
-            }
-        }
-    }
-    else
-    {
-        // Sử dụng exact matches
-        QStringList suggestionList;
-        for (const auto &s : exactMatches)
-            suggestionList << QString::fromStdString(s);
-
-        completerModel->setStringList(suggestionList);
-        completer->setCompletionPrefix(prefix);
-
-        if (completer->completionCount() > 0)
-        {
-            QRect cr = codeEditor->cursorRect();
-            cr.setWidth(completer->popup()->sizeHintForColumn(0) +
-                        completer->popup()->verticalScrollBar()->sizeHint().width());
-            completer->complete(cr);
-        }
-    }
+    // Cập nhật suggestions khi con trỏ di chuyển
+    updateSuggestions();
 }
 
 void MainWindow::onDiagnosticItemClicked(QListWidgetItem *item)
@@ -485,13 +446,11 @@ void MainWindow::onAutoCheckToggled(int state)
 {
     if (state == Qt::Checked)
     {
-        // Bật auto-check, trigger kiểm tra ngay
         autoCheckTimer->start(1500);
         statusLabel->setText("✓ Đã bật tự động kiểm tra");
     }
     else
     {
-        // Tắt auto-check, dừng timer
         autoCheckTimer->stop();
         statusLabel->setText("✗ Đã tắt tự động kiểm tra");
     }
@@ -499,7 +458,6 @@ void MainWindow::onAutoCheckToggled(int state)
 
 void MainWindow::onClearAll()
 {
-    // Dừng timer
     if (autoCheckTimer->isActive())
         autoCheckTimer->stop();
 
