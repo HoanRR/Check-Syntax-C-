@@ -258,6 +258,9 @@ void MainWindow::performAutoCheck()
     diagnosticList->clear();
     codeEditor->clearHighlights();
 
+    dictionary = Trie();     
+    populateDictionary();
+
     std::string srcCode = code.toStdString();
 
     // Bước 1: Xử lý #include
@@ -299,11 +302,12 @@ void MainWindow::performAutoCheck()
     Parser parser(tokens);
     semantics sem;
     sem.enterScope();
+    sem.setTrie(&dictionary);
+    
     vector<string> libIdentifiers = preprocessor.getLibraryIdentifiers();
     for (const auto &ident : libIdentifiers)
     {
         sem.LibraryFunction(ident);
-        // Thêm library functions vào dictionary
         dictionary.insert(ident);
     }
 

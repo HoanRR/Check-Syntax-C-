@@ -2,6 +2,7 @@
 
 semantics::semantics() : diag(nullptr),
                          inFunction(false),
+                         trie(nullptr),
                          currentFunc(),
                          currentRet(TypeKind::Void),
                          funcTok("", TokenType::Unknown, 0, 0, 0) {};
@@ -9,6 +10,10 @@ semantics::semantics() : diag(nullptr),
 void semantics::setReporter(DiagnosticReporter *r)
 {
     diag = r;
+}
+void semantics::setTrie(Trie *t)
+{
+    trie = t;
 }
 // ===== Scope =====
 void semantics::enterScope()
@@ -29,13 +34,15 @@ void semantics::beginFunction(TypeKind retKind, const Token &nameTok)
     funcTok = nameTok;
 
     str_Symbol s{nameTok.value, true, retKind, nameTok};
-
     if (!sym.declareSymbol(s))
     {
         if (diag)
             diag->redeclaration(nameTok.value, nameTok.line, nameTok.col, nameTok.length);
     }
-
+    else if (trie)
+    {
+        trie->insert(nameTok.value);
+    }
     enterScope();
 }
 
@@ -59,6 +66,10 @@ void semantics::declareVar(TypeKind ty, const Token &nameTok)
         if (diag)
             diag->redeclaration(nameTok.value, nameTok.line, nameTok.col, nameTok.length);
     }
+    else if (trie)
+    {
+        trie->insert(nameTok.value);
+    }
 }
 
 void semantics::declareParam(TypeKind ty, const Token &nameTok)
@@ -71,8 +82,24 @@ void semantics::useIdent(const Token &identTok)
 {
     if (sym.lookupSymbol(identTok.value) == nullptr)
     {
+        string suggestion;
+
+        // Nếu có Trie, tìm gợi ý bằng A*
+        if (trie)
+        {
+            // Lấy 1 gợi ý tốt nhất
+            vector<string> suggestions = trie->findSimilarWords(identTok.value, 1);
+            if (!suggestions.empty())
+            {
+                suggestion = suggestions[0];
+            }
+        }
+
         if (diag)
-            diag->undeclared(identTok.value, identTok.line, identTok.col, identTok.length);
+        {
+            // Truyền gợi ý vào hàm undeclared
+            diag->undeclared(identTok.value, identTok.line, identTok.col, identTok.length, suggestion);
+        }
     }
 }
 

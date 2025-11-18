@@ -1,9 +1,11 @@
 #pragma once
 #include "..\symboltable\symboltable.h"
 #include "..\Diagnostic\DiagnosticReporter.h"
+#include "..\trie.h"
 class semantics
 {
     DiagnosticReporter *diag = nullptr;
+    Trie *trie = nullptr;
 
     bool inFunction = false;
     string currentFunc;
@@ -14,6 +16,7 @@ public:
     SymbolTable sym;
     semantics();
     void setReporter(DiagnosticReporter *r);
+    void setTrie(Trie *t);
 
     void enterScope();
     void leaveScope();
@@ -29,5 +32,4 @@ public:
     void onReturnToken(const Token &retTok, bool hasExpr);
 
     void LibraryFunction(const string &name);
-    
 };
