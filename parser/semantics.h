@@ -5,18 +5,17 @@
 class semantics
 {
     DiagnosticReporter *diag = nullptr;
-    Trie *trie = nullptr;
 
     bool inFunction = false;
     string currentFunc;
     TypeKind currentRet = TypeKind::Void;
     Token funcTok;
+    Trie identifierTrie;
 
 public:
     SymbolTable sym;
     semantics();
     void setReporter(DiagnosticReporter *r);
-    void setTrie(Trie *t);
 
     void enterScope();
     void leaveScope();

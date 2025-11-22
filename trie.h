@@ -21,17 +21,14 @@ class Trie
 private:
     TrieNode* root;
     
-    // Các hàm helper private
     void dfs(TrieNode* node, string prefix, vector<string>& result);
     void collectWordsWithPrefix(TrieNode* node, string prefix, vector<string>& result, int limit);
     void deleteTrie(TrieNode* node);
 
 public:
-    // Constructor & Destructor
     Trie();
     ~Trie();
     
-    // Các hàm công khai
     void insert(const string& word);
     bool search(const string& word);
     vector<string> getAllWords();

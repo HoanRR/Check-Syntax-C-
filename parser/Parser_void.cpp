@@ -283,7 +283,7 @@ void Parser::parseBlock(bool isFunctionBlock)
     expectSym("{");
     if (isEnd())
     {
-        reportSyntax("thiếu '}' trước khi kết thúc file", t.back());
+        reportSyntax("thiếu '}' ", t.back());
         if (!isFunctionBlock)
             sem->leaveScope();
         return;
@@ -303,7 +303,7 @@ void Parser::parseBlock(bool isFunctionBlock)
     }
     if (isEnd())
     {
-        reportSyntax("thiếu '}' trước khi kết thúc file", t.back());
+        reportSyntax("thiếu '}' ", t.back());
         if (!isFunctionBlock)
             sem->leaveScope();
         return;

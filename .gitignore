@@ -74,10 +74,3 @@ Thumbs.db
 /libs/
 /external/
 
-# ==========================================
-# === 7. Misc optional ====================
-# ==========================================
-# Ignore generated test outputs or JSON logs
-*.json
-*.csv
-*.txt

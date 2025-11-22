@@ -51,10 +51,7 @@ public:
     {
         add(DiagSeverity::Warning, "W1", "Biến " + name + " đã được khai báo trong phạm vi này", line, col, len);
     }
-    void typeMismatch(const string &fromT, const string &toT, int line, int col, int len)
-    {
-        add(DiagSeverity::Error, "E3", "Không thể gắn " + fromT + "vào " + toT, line, col, len);
-    }
+
     const vector<DiagnosticItem> &all() const
     {
         return this->items;

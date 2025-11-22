@@ -100,11 +100,7 @@ vector<string> Preprocessor::getLibraryIdentifiers() const
     // Thêm identifiers từ các thư viện đã include
     for (const auto &lib : includedLibs)
     {
-        if (lib == "iostream")
-        {
-            identifiers.insert(identifiers.end(), {"cout", "cin", "cerr", "clog", "endl"});
-        }
-        else if (lib == "stdio.h" || lib == "cstdio")
+        if (lib == "stdio.h" || lib == "cstdio")
         {
             identifiers.insert(identifiers.end(), {"printf", "scanf", "fprintf", "fscanf", "sprintf", "sscanf",
                                                    "getchar", "putchar", "puts", "FILE"});

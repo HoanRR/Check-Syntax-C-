@@ -3,6 +3,8 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFont>
+#include <QScreen>
+#include <QGuiApplication>
 #include <QMessageBox>
 #include <QTextBlock>
 #include "../parser/semantics.h"
@@ -13,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     setupUI();
     setupConnections();
     populateDictionary();
-
+    setMinimumSize(1000, 700);
     // Setup auto-check timer
     autoCheckTimer = new QTimer(this);
     autoCheckTimer->setSingleShot(true);
@@ -25,7 +27,7 @@ MainWindow::~MainWindow() {}
 void MainWindow::setupUI()
 {
     setWindowTitle("C Compiler IDE");
-    setMinimumSize(1000, 700);
+    resize(1000, 700);
 
     QWidget *centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
@@ -77,8 +79,8 @@ void MainWindow::setupUI()
     autoCheckBox->setChecked(true);
     autoCheckBox->setStyleSheet("font-size: 13px; padding: 5px;");
 
-    buttonLayout->addWidget(checkButton);
     buttonLayout->addWidget(clearButton);
+    buttonLayout->addWidget(checkButton);
     buttonLayout->addWidget(autoCheckBox);
     buttonLayout->addStretch();
 
@@ -258,9 +260,6 @@ void MainWindow::performAutoCheck()
     diagnosticList->clear();
     codeEditor->clearHighlights();
 
-    dictionary = Trie();     
-    populateDictionary();
-
     std::string srcCode = code.toStdString();
 
     // Bước 1: Xử lý #include
@@ -302,8 +301,7 @@ void MainWindow::performAutoCheck()
     Parser parser(tokens);
     semantics sem;
     sem.enterScope();
-    sem.setTrie(&dictionary);
-    
+
     vector<string> libIdentifiers = preprocessor.getLibraryIdentifiers();
     for (const auto &ident : libIdentifiers)
     {
