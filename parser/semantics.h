@@ -1,7 +1,6 @@
 #pragma once
 #include "..\symboltable\symboltable.h"
 #include "..\Diagnostic\DiagnosticReporter.h"
-#include "..\trie.h"
 class semantics
 {
     DiagnosticReporter *diag = nullptr;
@@ -10,7 +9,6 @@ class semantics
     string currentFunc;
     TypeKind currentRet = TypeKind::Void;
     Token funcTok;
-    Trie identifierTrie;
 
 public:
     SymbolTable sym;

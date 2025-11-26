@@ -35,11 +35,6 @@ void semantics::beginFunction(TypeKind retKind, const Token &nameTok)
         if (diag)
             diag->redeclaration(nameTok.value, nameTok.line, nameTok.col, nameTok.length);
     }
-    else
-    {
-        this->identifierTrie.insert(nameTok.value);
-    }
-
     enterScope();
 }
 
@@ -63,10 +58,6 @@ void semantics::declareVar(TypeKind ty, const Token &nameTok)
         if (diag)
             diag->redeclaration(nameTok.value, nameTok.line, nameTok.col, nameTok.length);
     }
-    else
-    {
-        this->identifierTrie.insert(nameTok.value);
-    }
 }
 
 void semantics::declareParam(TypeKind ty, const Token &nameTok)
@@ -79,11 +70,9 @@ void semantics::useIdent(const Token &identTok)
 {
     if (sym.lookupSymbol(identTok.value) == nullptr)
     {
-        // Lỗi: Không tìm thấy
         string suggestion;
 
-        // Dùng A* trên cây Trie CHỈ chứa định danh
-        vector<string> suggestions = identifierTrie.findSimilarWords(identTok.value, 1);
+        vector<string> suggestions = sym.getSuggestions(identTok.value);
 
         if (!suggestions.empty())
         {
@@ -92,7 +81,6 @@ void semantics::useIdent(const Token &identTok)
 
         if (diag)
         {
-            // Truyền gợi ý (nếu tìm thấy) vào hàm undeclared
             diag->undeclared(identTok.value, identTok.line, identTok.col, identTok.length, suggestion);
         }
     }
@@ -124,12 +112,12 @@ void semantics::onReturnToken(const Token &retTok, bool hasExpr)
 void semantics::LibraryFunction(const string &name)
 {
     Token libToken(name, TokenType::Identifier, 0, 0, name.length());
-
     str_Symbol s{name, true, TypeKind::Unknown, libToken};
 
-    if (!sym.scopes.empty())
+    if (sym.scopes.empty())
     {
-        auto &globalScope = sym.scopes[0];
-        globalScope.emplace(name, std::move(s));
+        sym.enterScope();
     }
+
+    sym.declareSymbol(s);
 }

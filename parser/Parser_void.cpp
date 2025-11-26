@@ -66,7 +66,46 @@ bool Parser::isKw(const string &s)
 }
 bool Parser::isSyncSym(const Token &tok)
 {
-    return tok.type == Symbol && (tok.value == ";" || tok.value == "}");
+    if (tok.type == Symbol && (tok.value == ";" || tok.value == "}"))
+        return true;
+
+    if (tok.type == Symbol && tok.value == "{")
+        return true;
+
+    if (tok.type == Keyword)
+    {
+        string v = tok.value;
+        return v == "if" || v == "else" || v == "while" || v == "for" ||
+               v == "return" || v == "break" || v == "continue" ||
+               v == "int" || v == "float" || v == "double" ||
+               v == "void" || v == "char" || v == "long" || v == "const";
+    }
+
+    return false;
+}
+bool Parser::isExprStart()
+{
+    Token tok = LA();
+    if (tok.type == TokenType::Identifier ||
+        tok.type == TokenType::Number ||
+        tok.type == TokenType::String ||
+        tok.type == TokenType::Char)
+    {
+        return true;
+    }
+
+    if (isSym("("))
+    {
+        return true;
+    }
+
+    if (tok.type == TokenType::Operator)
+    {
+        string v = tok.value;
+        return v == "+" || v == "-" || v == "!" || v == "++" || v == "--";
+    }
+
+    return false;
 }
 
 bool Parser::acceptOp(const string &s)
@@ -111,10 +150,6 @@ void Parser::expectSym(const string &s)
         return;
     }
     while (!isEnd() && !isSym(s) && !isSyncSym(LA()))
-    {
-        upP();
-    }
-    if (isSym(s))
     {
         upP();
     }
@@ -185,33 +220,64 @@ Token Parser::expectIdent()
 }
 bool Parser::lookLikeType()
 {
-    int q = 0;
-    if (isKw("const"))
+    int k = 0;
+
+    // 1. Kiểm tra xem có bắt đầu bằng 'const' không
+    if (LA(k).type == Keyword && LA(k).value == "const")
     {
-        q = 1;
-    }
-    if (q)
-    {
+        k++;
+
+        // 2. Nhảy qua các dấu '*' nếu có (con trỏ hằng)
+        while (LA(k).type == Operator && LA(k).value == "*")
+        {
+            k++;
+        }
     }
 
-    return isKw("int") || isKw("float") || isKw("double") || isKw("long") || isKw("void") || isKw("char") ||
-           (q && (LA(1 + q - 1).type == Keyword && (LA(q).value == "int" || LA(q).value == "float" || LA(q).value == "double" ||
-                                                    LA(q).value == "long" || LA(q).value == "void" || LA(q).value == "char")));
+    // 3.kiểm tra xem có phải là kiểu cơ bản không
+    if (LA(k).type == Keyword)
+    {
+        string val = LA(k).value;
+        return val == "int" || val == "float" || val == "double" ||
+               val == "long" || val == "void" || val == "char";
+    }
+
+    return false;
 }
-
 bool Parser::lookLikeFunction()
 {
-    if (!lookLikeType())
-        return false;
+    int k = 0;
+    if (LA(k).type == Keyword && LA(k).value == "const")
+    {
+        k++;
+        while (LA(k).type == Operator && LA(k).value == "*")
+            k++;
+    }
 
-    if (t.size() <= p + 1)
-        return false;
+    // có kiểu dữ liệu
+    if (LA(k).type == Keyword)
+    {
+        string val = LA(k).value;
+        bool isType = (val == "int" || val == "float" || val == "double" ||
+                       val == "long" || val == "void" || val == "char");
+        if (isType)
+        {
+            k++;
+            while (LA(k).type == Operator && LA(k).value == "*")
+                k++;
+            if (LA(k).type == Identifier && p + k + 1 < t.size() && LA(k + 1).value == "(")
+                return true;
+        }
+    }
 
-    if (LA(1).type != Identifier)
-        return false;
-
-    if (p + 2 < t.size() && LA(2).type == Symbol && LA(2).value == "(")
-        return true;
+    // Hàm thiếu kiểu
+    if (LA(0).type == Identifier)
+    {
+        if (p + 1 < t.size() && LA(1).type == Symbol && LA(1).value == "(")
+        {
+            return true;
+        }
+    }
 
     return false;
 }
@@ -378,10 +444,29 @@ void Parser::parseReturnStmt()
 void Parser::parseIfStmt()
 {
     expectKw("if");
-    expectSym("(");
-    parseExpr();
-    expectSym(")");
+
+    if (acceptSym("("))
+    {
+        parseExpr();
+        expectSym(")");
+    }
+    else
+    {
+        reportSyntax("thiếu '('", LA());
+
+        if (isExprStart())
+        {
+            parseExpr();
+        }
+
+        if (!acceptSym(")"))
+        {
+            reportSyntax("thiếu ')' ", LA());
+        }
+    }
+
     parseStmt();
+
     if (acceptKw("else"))
     {
         parseStmt();
@@ -391,9 +476,25 @@ void Parser::parseIfStmt()
 void Parser::parseWhileStmt()
 {
     expectKw("while");
-    expectSym("(");
-    parseExpr();
-    expectSym(")");
+    if (acceptSym("("))
+    {
+        parseExpr();
+        expectSym(")");
+    }
+    else
+    {
+        reportSyntax("thiếu '(' ", LA());
+
+        if (isExprStart())
+        {
+            parseExpr();
+        }
+
+        if (!acceptSym(")"))
+        {
+            reportSyntax("thiếu ')' ", LA());
+        }
+    }
     parseStmt();
 }
 
@@ -561,7 +662,13 @@ void Parser::parsePrimary()
     }
     // Không khớp gì cả -> lỗi
     reportSyntax("biểu thức không hợp lệ, thiếu toán hạng (identifier/number/(expr))", LA());
-    upP();
+    string val = LA().value;
+    bool isStopper = (val == ";" || val == "}" || val == ")");
+
+    if (!isStopper)
+    {
+        upP();
+    }
 }
 
 void Parser::parseType()
@@ -598,6 +705,13 @@ void Parser::parseType()
     }
     else
     {
+        if (LA().type == Identifier)
+        {
+            reportSyntax("thiếu kiểu dữ liệu", LA());
+            lastTypekind = TypeKind::Int;
+            return;
+        }
+
         reportSyntax("thiếu kiểu dữ liệu", LA());
         lastTypekind = TypeKind::Unknown;
         upP();

@@ -264,16 +264,8 @@ void MainWindow::performAutoCheck()
 
     // Bước 1: Xử lý #include
     Preprocessor preprocessor;
-    std::vector<std::string> warnings;
-    std::string processedCode = preprocessor.process(srcCode, warnings);
-
-    // Hiển thị cảnh báo từ preprocessor
-    for (const auto &warning : warnings)
-    {
-        QListWidgetItem *item = new QListWidgetItem("⚠️ " + QString::fromStdString(warning));
-        item->setForeground(QColor(245, 124, 0));
-        diagnosticList->addItem(item);
-    }
+    preprocessor.setDiagnosticReporter(&diagnostics);
+    std::string processedCode = preprocessor.process(srcCode);
 
     // Hiển thị các thư viện đã include thành công
     const auto &libs = preprocessor.getIncludedLibraries();
@@ -318,7 +310,7 @@ void MainWindow::performAutoCheck()
 
     // Bước 4: Hiển thị kết quả
     const auto &items = diagnostics.all();
-    if (items.empty() && warnings.empty())
+    if (items.empty())
     {
         statusLabel->setText("✓ Không có lỗi");
         statusLabel->setStyleSheet(
@@ -350,18 +342,6 @@ void MainWindow::performAutoCheck()
                 "  background-color: #ffebee;"
                 "  border-radius: 3px;"
                 "  color: #c62828;"
-                "  font-weight: bold;"
-                "}");
-        }
-        else
-        {
-            statusLabel->setText(QString("⚠ Có %1 cảnh báo").arg(warnings.size()));
-            statusLabel->setStyleSheet(
-                "QLabel {"
-                "  padding: 5px;"
-                "  background-color: #fff3e0;"
-                "  border-radius: 3px;"
-                "  color: #f57c00;"
                 "  font-weight: bold;"
                 "}");
         }

@@ -31,6 +31,7 @@ private:
     bool isSym(const string &);
     bool isKw(const string &);
     bool isSyncSym(const Token &);
+    bool isExprStart();
 
     bool acceptOp(const string &);
     bool acceptSym(const string &);
@@ -56,7 +57,7 @@ private:
     void parseReturnStmt(); // ReturnStmt:= "return" [Expr] ";"
     void parseIfStmt();     // IfStmt   := "if" "(" Expr ")" Stmt ["else" Stmt]
     void parseWhileStmt();  // WhileStmt:= "while" "(" Expr ")" Stmt
-    void parseForStmt(); // ForStmt := "for" "(" [ExprStmt] [Expr] ";" [Expr] ")" Stmt
+    void parseForStmt();    // ForStmt := "for" "(" [ExprStmt] [Expr] ";" [Expr] ")" Stmt
 
     // Expr
     void parseExpr();       // Expr     := Assign

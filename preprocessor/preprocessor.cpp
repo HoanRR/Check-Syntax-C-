@@ -2,7 +2,12 @@
 #include <sstream>
 #include <algorithm>
 
-string Preprocessor::process(const string &source, vector<string> &warnings)
+void Preprocessor::setDiagnosticReporter(DiagnosticReporter *reporter)
+{
+    diag = reporter;
+}
+
+string Preprocessor::process(const string &source)
 {
     reset();
     stringstream result;
@@ -48,7 +53,12 @@ string Preprocessor::process(const string &source, vector<string> &warnings)
             }
             else
             {
-                warnings.push_back("Dòng " + to_string(lineNum) + ": Cú pháp #include không hợp lệ");
+                if (diag)
+                {
+                    diag->add(DiagSeverity::Error, "PP-01",
+                              "Cú pháp #include không hợp lệ",
+                              lineNum, 1, line.length());
+                }
                 result << "\n";
                 lineNum++;
                 continue;
@@ -65,7 +75,12 @@ string Preprocessor::process(const string &source, vector<string> &warnings)
             }
             else
             {
-                warnings.push_back("Dòng " + to_string(lineNum) + ": Thư viện '" + libName + "' không được hỗ trợ");
+                if (diag)
+                {
+                    diag->add(DiagSeverity::Error, "PP-02",
+                              "Thư viện '" + libName + "' không được hỗ trợ",
+                              lineNum, 1, line.length());
+                }
             }
 
             // Thay thế dòng #include bằng dòng trống để giữ số dòng

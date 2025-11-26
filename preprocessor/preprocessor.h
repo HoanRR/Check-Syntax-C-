@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "../Diagnostic/DiagnosticReporter.h"
 #include <unordered_set>
 using namespace std;
 
@@ -13,13 +14,14 @@ private:
         // "ctype.h", "time.h", "stdbool.h", "stdint.h",
         // "limits.h", "float.h", "assert.h", "errno.h",
     };
-    
+    DiagnosticReporter *diag;
     unordered_set<string> includedLibs;
 
 public:
-    string process(const string& source, vector<string>& warnings);
+    void setDiagnosticReporter(DiagnosticReporter*);
+    string process(const string&  );
     
-    bool isValidLibrary(const string& libName);
+    bool isValidLibrary(const string& );
     
     const unordered_set<string>& getIncludedLibraries() const;
     
