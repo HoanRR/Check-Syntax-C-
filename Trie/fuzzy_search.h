@@ -1,3 +1,5 @@
+#ifndef FUZZY_SEARCH_H  
+#define FUZZY_SEARCH_H  
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -32,3 +34,5 @@ vector<string> findSimilarWordsAStar(
     const string &word,
     int maxSuggestions,
     vector<string> (*findWordsWithPrefix)(TrieNode *, const string &, int));
+    
+#endif // FUZZY_SEARCH_H
