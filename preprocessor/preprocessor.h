@@ -11,8 +11,6 @@ private:
     unordered_set<string> standardLibraries = {
         
         "stdio.h", "stdlib.h", "string.h", "math.h", 
-        // "ctype.h", "time.h", "stdbool.h", "stdint.h",
-        // "limits.h", "float.h", "assert.h", "errno.h",
     };
     DiagnosticReporter *diag;
     unordered_set<string> includedLibs;

@@ -1,8 +1,9 @@
 #include "Parser.h"
+
 #include <iostream>
 #include <sstream>
-
 using namespace std;
+
 int Parser::ERROR = 0;
 
 Parser::Parser(const vector<Token> &tok) : t(tok) {}
@@ -32,10 +33,6 @@ void Parser::reportSyntax(const string &msg, const Token &tok)
     if (diag)
     {
         diag->syntax(msg, tok.line, tok.col, tok.length);
-    }
-    else
-    {
-        cerr << "[Error] Line " << tok.line << ", Col " << tok.col << ": " << msg << endl;
     }
 }
 
@@ -570,6 +567,12 @@ void Parser::parseUnary()
 {
     if (acceptOp("+") || acceptOp("-") || acceptOp("!") || acceptOp("++") || acceptOp("--"))
     {
+        parseUnary();
+        return;
+    }
+    if (isOp("&"))
+    {
+        upP();
         parseUnary();
         return;
     }

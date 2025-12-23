@@ -1,4 +1,10 @@
 #pragma once
+#include "CodeEditor.h"
+#include "../lexer/Lexer.h"
+#include "../parser/Parser.h"
+#include "../Diagnostic/DiagnosticReporter.h"
+#include "../Trie/trie.h"
+
 #include <QMainWindow>
 #include <QTextEdit>
 #include <QListWidget>
@@ -7,11 +13,6 @@
 #include <QLabel>
 #include <QTimer>
 #include <QCheckBox>
-#include "CodeEditor.h"
-#include "../lexer/Lexer.h"
-#include "../parser/Parser.h"
-#include "../Diagnostic/DiagnosticReporter.h"
-#include "../trie.h"
 
 class MainWindow : public QMainWindow
 {

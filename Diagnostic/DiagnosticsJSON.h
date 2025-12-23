@@ -1,8 +1,9 @@
 #pragma once
-#include "DiagnosticReporter.h"
 #include <string>
 #include <sstream>
 using namespace std;
+
+#include "DiagnosticReporter.h"
 
 string Diagnostic_to_JSON(const vector<DiagnosticItem> &items)
 {

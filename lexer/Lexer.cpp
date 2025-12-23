@@ -1,5 +1,5 @@
 #include "Lexer.h"
-#include <unordered_set>
+
 char Lexer::peek(int k = 0)
 {
     return (i + k < src.size()) ? src[i + k] : '\0';

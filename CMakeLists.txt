@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(CCompilerIDE LANGUAGES CXX)
 
-# C++ & Qt build helpers
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
@@ -22,10 +22,12 @@ set(SRC
     lexer/Lexer.cpp
     parser/Parser_void.cpp
     parser/semantics.cpp
-    trie.cpp
+    Trie/trie.cpp
+    Diagnostic/DiagnosticReporter.cpp
+    symboltable/symboltable.cpp
 )
 
-# Header (liệt kê để IDE hiện file, không bắt buộc cho build)
+# Header 
 set(HDR
     preprocessor/preprocessor.h
     UI/MainWindow.h
@@ -40,10 +42,9 @@ set(HDR
     Diagnostic/DiagnosticsJSON.h
     symboltable/symboltable.h
     symboltable/type.h
-    trie.h
+    Trie/trie.h
 )
 
-# Nếu bạn không muốn hiện console trên Windows, thêm WIN32 sau tên target
 add_executable(${PROJECT_NAME} ${SRC} ${HDR})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
@@ -52,6 +53,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     parser
     Diagnostic
     symboltable
+    Trie
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

@@ -1,5 +1,8 @@
 #include "MainWindow.h"
 #include "SyntaxHighlighter.h"
+#include "../parser/semantics.h"
+#include "../preprocessor/preprocessor.h"
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFont>
@@ -7,8 +10,7 @@
 #include <QGuiApplication>
 #include <QMessageBox>
 #include <QTextBlock>
-#include "../parser/semantics.h"
-#include "../preprocessor/preprocessor.h"
+
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {

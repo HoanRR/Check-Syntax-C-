@@ -2,9 +2,7 @@
 #include "../lexer/Lexer.h"
 #include "../Diagnostic/DiagnosticReporter.h"
 #include "semantics.h"
-#include <iostream>
-#include <sstream>
-using namespace std;
+
 class Parser
 {
 public:
@@ -74,6 +72,7 @@ private:
     void parseShift();      //   <<, >>
     void parsePostfix();    //   hậu tố ++, --
 
-    void parseType();                                                      // Type     := "int" | "float" | "double" | "void"
+    void parseType();      // Type:= ["const"] ("int" | "float" | "double" | "long" | "char" | "void") {"*"}
+
     void parseBinaryLeftAssoc(void (Parser::*)(), const vector<string> &); // helper for left-assoc binary ops
 };

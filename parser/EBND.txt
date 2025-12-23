@@ -1,20 +1,15 @@
 Program      := { Function | Decl } EOF
-
 Function     := Type Ident "(" [ParamList] ")" Block
 Decl         := Type Ident [ "=" Expr ] ";"
-
 ParamList    := (Type Ident) { "," Type Ident }
-ArgList      := [Expr { "," Expr }]
-
 Block        := "{" { Stmt } "}"
-Stmt         := Decl | ExprStmt | ReturnStmt | IfStmt | WhileStmt | ForStmt | Block
 
+Stmt         := Decl | ExprStmt | ReturnStmt | IfStmt | WhileStmt | ForStmt | Block
 ExprStmt     := [Expr] ";"
 ReturnStmt   := "return" [Expr] ";"
 IfStmt       := "if" "(" Expr ")" Stmt ["else" Stmt]
 WhileStmt    := "while" "(" Expr ")" Stmt
 ForStmt      := "for" "(" [ExprStmt] [Expr] ";" [Expr] ")" Stmt
-
 
 Expr         := Assign
 Assign       := Logic ( "=" Assign )?
@@ -25,6 +20,16 @@ Mul          := Unary ( ("*" | "/" | "%") Unary )*
 Unary        := ("+" | "-" | "!")? Primary
 Primary      := Ident | Number | "(" Expr ")"
 
-Type         := "int" | "float" | "double" | "void"
-Ident        := letter { letter | digit | "_" }
-Number       := digit { digit }
+Expr         ::= Assign
+Assign       ::= Logic [ "=" Assign ]
+Logic        ::= Rel { ("&&" | "||") Rel }
+Rel          ::= Add { ("==" | "!=" | "<" | ">" | "<=" | ">=") Add }
+Add          ::= Mul { ("+" | "-") Mul }
+Mul          ::= Unary { ("*" | "/" | "%") Unary }
+Unary        ::= ("+" | "-" | "!" | "++" | "--") Unary | Postfix
+Postfix      ::= Primary { "++" | "--" }
+Primary      ::= Ident | Number | String | Char | "(" Expr ")" 
+
+Type         := ["const"] ("int" | "float" | "double" | "long" | "char" | "void") {"*"}
+Ident        := (letter| "_" ) { letter | digit | "_" }
+Number       := digit { digit }[ "." { digit } ]
