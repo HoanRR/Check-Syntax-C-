@@ -15,7 +15,6 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 # Nguồn
 set(SRC
     preprocessor/preprocessor.cpp
-    UI/main.cpp
     UI/MainWindow.cpp
     UI/CodeEditor.cpp
     UI/SyntaxHighlighter.cpp
@@ -23,8 +22,10 @@ set(SRC
     parser/Parser_void.cpp
     parser/semantics.cpp
     Trie/trie.cpp
+    Trie/fuzzy_search.cpp
     Diagnostic/DiagnosticReporter.cpp
     symboltable/symboltable.cpp
+    Main.cpp
 )
 
 # Header 
@@ -43,6 +44,7 @@ set(HDR
     symboltable/symboltable.h
     symboltable/type.h
     Trie/trie.h
+    Trie/fuzzy_search.h
 )
 
 add_executable(${PROJECT_NAME} ${SRC} ${HDR})
